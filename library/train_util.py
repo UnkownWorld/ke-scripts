@@ -4930,6 +4930,10 @@ def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents):
 
     return noise, noisy_latents, timesteps, huber_c
 
+def contrastive_loss(embeddings1, embeddings2, labels, margin=0.8):
+    distances = torch.nn.functional.pairwise_distance(embeddings1, embeddings2)
+    loss = torch.mean((1 - labels) * torch.pow(distances, 2) + labels * torch.pow(torch.clamp(margin - distances, min=0), 2))
+    return loss
 
 # NOTE: if you're using the scheduled version, huber_c has to depend on the timesteps already
 def conditional_loss(
