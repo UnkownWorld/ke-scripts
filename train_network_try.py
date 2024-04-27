@@ -51,7 +51,7 @@ class NetworkTrainer:
         self.vae_scale_factor = 0.18215
         self.is_sdxl = False
 
-    def get_text_embedding(self,tokenizer, text_encoder, batch, accelerator, train_text_encoder, clip_skip=True, weight_dtype=None,args):
+    def get_text_embedding(self,tokenizer, text_encoder, batch, accelerator, args,train_text_encoder, clip_skip=True, weight_dtype=None):
         with torch.set_grad_enabled(train_text_encoder), accelerator.autocast():
         # Get the text embedding for conditioning
             if args.weighted_captions:
@@ -854,7 +854,7 @@ class NetworkTrainer:
                     if(step in positive_steps):
                         is_posivate = True
                         pos_latents = self.process_latents(pos_batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
-                        pos_text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, pos_batch, accelerator, train_text_encoder, args.clip_skip, weight_dtype,args)
+                        pos_text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, pos_batch, accelerator,args, train_text_encoder, args.clip_skip, weight_dtype)
                         pos_noise, pos_noisy_latents, pos_timesteps, pos_huber_c = train_util.get_noise_noisy_latents_and_timesteps(
                             args, noise_scheduler, pos_latents
                         )
@@ -893,7 +893,7 @@ class NetworkTrainer:
                             raise NotImplementedError("multipliers for each sample is not supported yet")
                         # print(f"set multiplier: {multipliers}")
                         accelerator.unwrap_model(network).set_multiplier(multipliers)
-                    text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, batch, accelerator, train_text_encoder, args.clip_skip, weight_dtype,args)
+                    text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, batch, accelerator,args, train_text_encoder, args.clip_skip, weight_dtype)
                     
                     # Sample noise, sample a random timestep for each image, and add noise to the latents,
                     # with noise offset and/or multires noise if specified
