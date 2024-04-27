@@ -834,7 +834,7 @@ class NetworkTrainer:
                 is_posivate = True
                 positive_step = math.ceil(num_update_steps_per_epoch * args.positivate_weight)
                 positive_steps = random.sample(range(num_update_steps_per_epoch-1), positivate_step)
-            elif:
+            else:
                 positivate_step = 0
                 is_posivate = False
             metadata["ss_epoch"] = str(epoch + 1)
@@ -878,7 +878,7 @@ class NetworkTrainer:
                         pos_input_ids = pos_batch["input_ids"]
                         labels = torch.nn.functional.cosine_similarity(input_ids, pos_input_ids)
                         print("test_label",labels)
-                    elif:
+                    else:
                         is_posivate = False
                     # get multiplier for each sample
                     if network_has_multiplier:
@@ -925,7 +925,7 @@ class NetworkTrainer:
                         target = noise
                     if(is_posivate):
                         loss = train_util.contrastive_loss(noise_pred, pos_noise_pred, labels, 0.8)
-                    elif:
+                    else:
                         loss = train_util.conditional_loss(
                             noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c
                         )
