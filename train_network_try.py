@@ -51,7 +51,7 @@ class NetworkTrainer:
         self.vae_scale_factor = 0.18215
         self.is_sdxl = False
 
-    def get_text_embedding(tokenizer, text_encoder, batch, accelerator, args, clip_skip=True, weight_dtype=None):
+    def get_text_embedding(self,tokenizer, text_encoder, batch, accelerator, args, clip_skip=True, weight_dtype=None):
         with torch.set_grad_enabled(args.train_text_encoder), accelerator.autocast():
         # Get the text embedding for conditioning
             if args.weighted_captions:
@@ -70,7 +70,7 @@ class NetworkTrainer:
     
         return text_encoder_conds
 
-    def process_latents(batch, vae, vae_dtype, weight_dtype, vae_scale_factor):
+    def process_latents(self,batch, vae, vae_dtype, weight_dtype, vae_scale_factor):
         # 检查batch中是否包含latents键，且其值不为None
         if "latents" in batch and batch["latents"] is not None:
             latents = batch["latents"].to(accelerator.device).to(dtype=weight_dtype)
@@ -849,12 +849,12 @@ class NetworkTrainer:
                 with accelerator.accumulate(training_model):
                     on_step_start(text_encoder, unet)
 
-                    latents = self.process_latents(batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
+                    latents = self.process_latents(self,batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
                     pos_batch = train_dataloader.dataset[random.randint(0, num_update_steps_per_epoch-1)]
                     if(step in positivate_steps):
                         is_posivate = True
-                        pos_latents = self.process_latents(pos_batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
-                        pos_text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, pos_batch, accelerator, args, args.clip_skip, weight_dtype)
+                        pos_latents = self.process_latents(self,pos_batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
+                        pos_text_encoder_conds = self.get_text_embedding(self,tokenizer, text_encoder, pos_batch, accelerator, args, args.clip_skip, weight_dtype)
                         pos_noise, pos_noisy_latents, pos_timesteps, pos_huber_c = train_util.get_noise_noisy_latents_and_timesteps(
                             args, noise_scheduler, pos_latents
                         )
@@ -893,7 +893,7 @@ class NetworkTrainer:
                             raise NotImplementedError("multipliers for each sample is not supported yet")
                         # print(f"set multiplier: {multipliers}")
                         accelerator.unwrap_model(network).set_multiplier(multipliers)
-                    text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, batch, accelerator, args, args.clip_skip, weight_dtype)
+                    text_encoder_conds = self.get_text_embedding(self,tokenizer, text_encoder, batch, accelerator, args, args.clip_skip, weight_dtype)
                     
                     # Sample noise, sample a random timestep for each image, and add noise to the latents,
                     # with noise offset and/or multires noise if specified
