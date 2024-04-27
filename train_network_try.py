@@ -854,6 +854,8 @@ class NetworkTrainer:
                     if(step in positive_steps):
                         is_posivate = True
                         pos_latents = self.process_latents(pos_batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
+                        print("test_posivate_batch",pos_batch)
+                        print("test_batch",batch)
                         pos_text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, pos_batch, accelerator,args, train_text_encoder, args.clip_skip, weight_dtype)
                         pos_noise, pos_noisy_latents, pos_timesteps, pos_huber_c = train_util.get_noise_noisy_latents_and_timesteps(
                             args, noise_scheduler, pos_latents
