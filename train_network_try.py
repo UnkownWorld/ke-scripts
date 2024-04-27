@@ -827,18 +827,18 @@ class NetworkTrainer:
         self.sample_images(accelerator, args, 0, global_step, accelerator.device, vae, tokenizer, text_encoder, unet)
             
         # training loop
-        positivate_step = 0
+        posivate_step = 0
         is_posivate = False
         vae_scale_factor = self.vae_scale_factor
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
-            if(args.positivate_weight):
+            if(args.posivate_weight):
                 is_posivate = True
-                positive_step = math.ceil(num_update_steps_per_epoch * args.positivate_weight)
-                positive_steps = random.sample(range(num_update_steps_per_epoch-1), positivate_step)
+                positive_step = math.ceil(num_update_steps_per_epoch * args.posivate_weight)
+                positive_steps = random.sample(range(num_update_steps_per_epoch-1), posivate_step)
             else:
-                positivate_step = 0
+                posivate_step = 0
                 is_posivate = False
             metadata["ss_epoch"] = str(epoch + 1)
 
@@ -851,7 +851,7 @@ class NetworkTrainer:
 
                     latents = self.process_latents(batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
                     pos_batch = train_dataloader.dataset[random.randint(0, num_update_steps_per_epoch-1)]
-                    if(step in positivate_steps):
+                    if(step in positive_steps):
                         is_posivate = True
                         pos_latents = self.process_latents(pos_batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
                         pos_text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, pos_batch, accelerator, args, args.clip_skip, weight_dtype)
@@ -1153,7 +1153,7 @@ def setup_parser() -> argparse.ArgumentParser:
         help="do not use fp16/bf16 VAE in mixed precision (use float VAE) / mixed precisionでも fp16/bf16 VAEを使わずfloat VAEを使う",
     )
     parser.add_argument(
-        "--positivate_weight",
+        "--posivate_weight",
         type=float,
         default=None,
         help="if start positive train",
