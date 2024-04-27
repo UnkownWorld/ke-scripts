@@ -829,6 +829,7 @@ class NetworkTrainer:
         # training loop
         positivate_step = 0
         is_posivate = False
+        vae_scale_factor = self.vae_scale_factor
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
@@ -842,17 +843,17 @@ class NetworkTrainer:
             metadata["ss_epoch"] = str(epoch + 1)
 
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
-
+            
             for step, batch in enumerate(train_dataloader):
                 current_step.value = global_step
                 with accelerator.accumulate(training_model):
                     on_step_start(text_encoder, unet)
 
-                    latents = self.process_latents(batch, vae, vae_dtype, weight_dtype, self.vae_scale_factor)
+                    latents = self.process_latents(batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
                     pos_batch = train_dataloader.dataset[random.randint(0, num_update_steps_per_epoch-1)]
                     if(step in positivate_steps):
                         is_posivate = True
-                        pos_latents = self.process_latents(pos_batch, vae, vae_dtype, weight_dtype, self.vae_scale_factor)
+                        pos_latents = self.process_latents(pos_batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
                         pos_text_encoder_conds = self.get_text_embedding(tokenizer, text_encoder, pos_batch, accelerator, args, args.clip_skip, weight_dtype)
                         pos_noise, pos_noisy_latents, pos_timesteps, pos_huber_c = train_util.get_noise_noisy_latents_and_timesteps(
                             args, noise_scheduler, pos_latents
