@@ -883,6 +883,7 @@ class NetworkTrainer:
                         pos_input_ids = pos_batch["input_ids"]
                         labels = torch.nn.functional.cosine_similarity(input_ids, pos_input_ids)
                         accelerator.print(f"test_label:{labels}")
+                        labels = [0 if value < 0.3 else (1 if value > 0.6 else (value - 0.3) / 0.3) for value in values]
                     else:
                         is_posivate = False
                     # get multiplier for each sample
