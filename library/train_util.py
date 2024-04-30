@@ -129,8 +129,15 @@ except:
 
 IMAGE_TRANSFORMS = transforms.Compose(
     [
+        transforms.ColorJitter(saturation = [1.5,2],brightness=[0.8,1.1],contrast=[1,1.5]),
         transforms.ToTensor(),
-        transforms.Normalize([-0.5], [0.5]),
+        transforms.Normalize([0.5], [0.5]),
+    ]
+)
+IMAGE_TRANSFORMS2 = transforms.Compose(
+    [
+        transforms.ToTensor(),
+        transforms.Normalize([0.5], [0.5]),
     ]
 )
 
