@@ -136,8 +136,6 @@ IMAGE_TRANSFORMS = transforms.Compose(
 IMAGE_TRANSFORMS3 = transforms.Compose(
     [
         transforms.ColorJitter(saturation = [1.5,2],brightness=[0.8,1.1],contrast=[1,1.5]),
-        transforms.ToTensor(),
-        transforms.Normalize([0.5], [0.5]),
     ]
 )
 IMAGE_TRANSFORMS2 = transforms.Compose(
@@ -1102,7 +1100,7 @@ class BaseDataset(torch.utils.data.Dataset):
         return imagesize.get(image_path)
 
     def load_image_with_face_info(self, subset: BaseSubset, image_path: str):
-        img = load_image(image_path)
+        img = load_image_tr(image_path)
 
         face_cx = face_cy = face_w = face_h = 0
         if subset.face_crop_aug_range is not None:
@@ -2364,7 +2362,13 @@ def load_image(image_path):
         image = image.convert("RGB")
     img = np.array(image, np.uint8)
     return img
-
+def load_image_tr(image_path):
+    image = Image.open(image_path)
+    if not image.mode == "RGB":
+        image = image.convert("RGB")
+    image = IMAGE_TRANSFORMS3(image)
+    img = np.array(image, np.uint8)
+    return img
 
 # 画像を読み込む。戻り値はnumpy.ndarray,(original width, original height),(crop left, crop top, crop right, crop bottom)
 def trim_and_resize_if_required(
