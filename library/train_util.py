@@ -638,7 +638,7 @@ class BaseDataset(torch.utils.data.Dataset):
         # augmentation
         self.aug_helper = AugHelper()
 
-        self. = 
+        self.image_transforms = IMAGE_TRANSFORMS
 
         self.image_data: Dict[str, ImageInfo] = {}
         self.image_to_subset: Dict[str, Union[DreamBoothSubset, FineTuningSubset]] = {}
