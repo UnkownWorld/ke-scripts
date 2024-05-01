@@ -129,13 +129,13 @@ except:
 
 IMAGE_TRANSFORMS = transforms.Compose(
     [
+        transforms.ToTensor(),
         transforms.Normalize([0.5], [0.5]),
     ]
 )
 IMAGE_TRANSFORMS3 = transforms.Compose(
     [
         transforms.ColorJitter(saturation = [1.5,2],brightness=[0.8,1.1],contrast=[1,1.5]),
-        transforms.ToTensor(),
     ]
 )
 IMAGE_TRANSFORMS2 = transforms.Compose(
@@ -1100,7 +1100,7 @@ class BaseDataset(torch.utils.data.Dataset):
         return imagesize.get(image_path)
 
     def load_image_with_face_info(self, subset: BaseSubset, image_path: str):
-        img = load_image_tr(image_path)
+        img = load_image_tr(image_path,0.7)
 
         face_cx = face_cy = face_w = face_h = 0
         if subset.face_crop_aug_range is not None:
@@ -2362,11 +2362,12 @@ def load_image(image_path):
         image = image.convert("RGB")
     img = np.array(image, np.uint8)
     return img
-def load_image_tr(image_path):
+def load_image_tr(image_path,rand):
     image = Image.open(image_path)
     if not image.mode == "RGB":
         image = image.convert("RGB")
-    image = IMAGE_TRANSFORMS3(image)
+    if random.random() > rand:
+        image = IMAGE_TRANSFORMS3(image)
     img = np.array(image, np.uint8)
     return img
 
