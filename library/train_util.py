@@ -1249,7 +1249,7 @@ class BaseDataset(torch.utils.data.Dataset):
                     img = img[:, ::-1, :].copy()  # copy to avoid negative stride problem
 
                 latents = None
-                image = self.(img)  # -1.0~1.0のtorch.Tensorになる
+                image = self.image_transforms(img)  # -1.0~1.0のtorch.Tensorになる
 
             images.append(image)
             latents_list.append(latents)
