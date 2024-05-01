@@ -638,7 +638,7 @@ class BaseDataset(torch.utils.data.Dataset):
         # augmentation
         self.aug_helper = AugHelper()
 
-        self.image_transforms = IMAGE_TRANSFORMS
+        self. = 
 
         self.image_data: Dict[str, ImageInfo] = {}
         self.image_to_subset: Dict[str, Union[DreamBoothSubset, FineTuningSubset]] = {}
@@ -1249,7 +1249,7 @@ class BaseDataset(torch.utils.data.Dataset):
                     img = img[:, ::-1, :].copy()  # copy to avoid negative stride problem
 
                 latents = None
-                image = self.image_transforms(img)  # -1.0~1.0のtorch.Tensorになる
+                image = self.(img)  # -1.0~1.0のtorch.Tensorになる
 
             images.append(image)
             latents_list.append(latents)
@@ -1982,7 +1982,7 @@ class ControlNetDataset(BaseDataset):
             len(extra_imgs) == 0
         ), f"extra conditioning data for {len(extra_imgs)} images / 余分な制御用画像があります: {extra_imgs}"
 
-        self.conditioning_image_transforms = IMAGE_TRANSFORMS
+        self.conditioning_image_transforms = IMAGE_TRANSFORMS2
 
     def make_buckets(self):
         self.dreambooth_dataset_delegate.make_buckets()
