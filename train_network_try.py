@@ -829,15 +829,25 @@ class NetworkTrainer:
         # training loop
         posivate_step = 0
         is_posivate = False
+        pos_wh = args.posivate_weight
+        #多少次震荡曲线
+        pos_x = num_train_epochs/8/math.pi
         vae_scale_factor = self.vae_scale_factor
+        
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
-            if(args.posivate_weight):
-                is_posivate = True
-                posivate_weight = random.uniform(0, args.posivate_weight)
-                positive_step = math.ceil(num_update_steps_per_epoch * posivate_weight)
-                positive_steps = random.sample(range(num_update_steps_per_epoch-1), posivate_step)
+            if(pos_wh):
+                pos_cos_value = math.cos(epoch * pos_x)
+                #只要1/4进行震荡
+                if (weight - 0.5） > 0):
+                    is_posivate = True
+                    weight = pos_wh * pos_cos_value
+                    positive_step = math.ceil(num_update_steps_per_epoch * weight)
+                    positive_steps = random.sample(range(num_update_steps_per_epoch-1), posivate_step)
+                else:
+                    posivate_step = 0
+                    is_posivate = False
             else:
                 posivate_step = 0
                 is_posivate = False
