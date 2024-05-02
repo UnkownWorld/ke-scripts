@@ -2366,7 +2366,7 @@ def load_image_tr(image_path,rand):
     image = Image.open(image_path)
     if not image.mode == "RGB":
         image = image.convert("RGB")
-    if random.random() > rand:
+    if random.random() <= rand:
         image = IMAGE_TRANSFORMS3(image)
     img = np.array(image, np.uint8)
     return img
