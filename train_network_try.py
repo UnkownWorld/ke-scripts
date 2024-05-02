@@ -840,7 +840,7 @@ class NetworkTrainer:
             if(pos_wh):
                 pos_cos_value = math.cos(epoch * pos_x)
                 #只要1/4进行震荡
-                if (weight - 0.5） > 0):
+                if ((weight - 0.5） > 0) :
                     is_posivate = True
                     weight = pos_wh * pos_cos_value
                     positive_step = math.ceil(num_update_steps_per_epoch * weight)
