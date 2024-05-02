@@ -845,17 +845,21 @@ class NetworkTrainer:
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
             
             for step, batch in enumerate(train_dataloader):
+                is_not_cn = batch.get("conditioning_images") is None
                 current_step.value = global_step
                 with accelerator.accumulate(training_model):
                     on_step_start(text_encoder, unet)
 
                     latents = self.process_latents(batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
-                    pos_batch = train_dataloader.dataset[random.randint(0, num_update_steps_per_epoch-1)]
-                    if(step in positive_steps):
+                    pos_not_cn = True
+                    if(step in positive_steps and is_not_cn):
+                        while (pos_not_cn):
+                            pos_batch = train_dataloader.dataset[random.randint(0, num_update_steps_per_epoch-1)]
+                            if pos_batch.get("conditioning_images") is None:
+                                pos_not_cn = False
+                            
                         is_posivate = True
                         pos_latents = self.process_latents(pos_batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
-                        accelerator.print(f"test_posivate_batch:{pos_batch}")
-                        accelerator.print(f"test_batch:{batch}")
                         pos_text_encoder_conds = self.get_text_embedding(tokenizers, text_encoders,tokenizer, text_encoder, pos_batch, accelerator,args, train_text_encoder, args.clip_skip, weight_dtype)
                         pos_noise, pos_noisy_latents, pos_timesteps, pos_huber_c = train_util.get_noise_noisy_latents_and_timesteps(
                             args, noise_scheduler, pos_latents
@@ -883,7 +887,7 @@ class NetworkTrainer:
                         pos_input_ids = pos_batch["input_ids"]
                         labels = torch.nn.functional.cosine_similarity(input_ids, pos_input_ids)
                         accelerator.print(f"test_label:{labels}")
-                        labels = [0 if value < 0.3 else (1 if value > 0.6 else (value - 0.3) / 0.3) for value in values]
+                        labels = [0 if value <= 0.2 else (1 if value >= 0.7 else (value - 0.2) / 0.5) for value in values]
                     else:
                         is_posivate = False
                     # get multiplier for each sample
@@ -930,13 +934,13 @@ class NetworkTrainer:
                     else:
                         target = noise
                     if(is_posivate):
-                        loss = train_util.contrastive_loss(noise_pred, pos_noise_pred, labels, 0.8)
+                        loss = train_util.contrastive_loss(noise_pred, pos_noise_pred, labels, 0.7)
                     else:
                         loss = train_util.conditional_loss(
                             noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c
                         )
-                    if args.masked_loss and batch.get("conditioning_images") is not None:
-                        loss = apply_masked_loss(loss, batch)
+                        if args.masked_loss and batch.get("conditioning_images") is not None:
+                            loss = apply_masked_loss(loss, batch)
                     loss = loss.mean([1, 2, 3])
 
                     loss_weights = batch["loss_weights"]  # 各sampleごとのweight
