@@ -832,6 +832,7 @@ class NetworkTrainer:
         pos_wh = args.posivate_weight
         #多少次震荡曲线
         pos_x = num_train_epochs/8/math.pi
+        half = math.cos(math.pi)
         vae_scale_factor = self.vae_scale_factor
         
         for epoch in range(num_train_epochs):
@@ -841,7 +842,7 @@ class NetworkTrainer:
                 pos_cos_value = math.cos(epoch * pos_x)
                 weight = pos_wh * pos_cos_value
                 #只要1/4进行震荡
-                if ((weight - 0.5） > 0) :
+                if ((weight - half） > 0) :
                     is_posivate = True
                     positive_step = math.ceil(num_update_steps_per_epoch * weight)
                     positive_steps = random.sample(range(num_update_steps_per_epoch-1), posivate_step)
