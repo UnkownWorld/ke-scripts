@@ -835,7 +835,8 @@ class NetworkTrainer:
             current_epoch.value = epoch + 1
             if(args.posivate_weight):
                 is_posivate = True
-                positive_step = math.ceil(num_update_steps_per_epoch * args.posivate_weight)
+                posivate_weight = random.uniform(0, args.posivate_weight)
+                positive_step = math.ceil(num_update_steps_per_epoch * posivate_weight)
                 positive_steps = random.sample(range(num_update_steps_per_epoch-1), posivate_step)
             else:
                 posivate_step = 0
