@@ -858,7 +858,8 @@ class NetworkTrainer:
                             pos_batch = train_dataloader.dataset[random.randint(0, num_update_steps_per_epoch-1)]
                             is_pos_batch = batch['batch_size'] == pos_batch['batch_size']
                             if (pos_batch.get("conditioning_images") is None):
-                                pos_not_cn = False
+                                if is_pos_batch:
+                                    pos_not_cn = False
                             
                         is_posivate = True
                         pos_latents = self.process_latents(pos_batch, vae, vae_dtype, weight_dtype, vae_scale_factor)
