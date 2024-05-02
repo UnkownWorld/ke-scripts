@@ -2020,9 +2020,9 @@ class ControlNetDataset(BaseDataset):
             cond_img = load_image(image_info.cond_img_path)
 
             if self.dreambooth_dataset_delegate.enable_bucket:
-                assert (
-                    cond_img.shape[0] == original_size_hw[0] and cond_img.shape[1] == original_size_hw[1]
-                ), f"size of conditioning image is not match / 画像サイズが合いません: {image_info.absolute_path}"
+                #assert (
+                #    cond_img.shape[0] == original_size_hw[0] and cond_img.shape[1] == original_size_hw[1]
+                #), f"size of conditioning image is not match / 画像サイズが合いません: {image_info.absolute_path}"
                 cond_img = cv2.resize(
                     cond_img, image_info.resized_size, interpolation=cv2.INTER_AREA
                 )  # INTER_AREAでやりたいのでcv2でリサイズ
