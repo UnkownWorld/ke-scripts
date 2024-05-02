@@ -935,7 +935,7 @@ class NetworkTrainer:
                         loss = train_util.conditional_loss(
                             noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c
                         )
-                    if args.masked_loss:
+                    if args.masked_loss and batch.get("conditioning_images") is not None:
                         loss = apply_masked_loss(loss, batch)
                     loss = loss.mean([1, 2, 3])
 
