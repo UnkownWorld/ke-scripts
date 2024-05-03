@@ -1531,7 +1531,7 @@ class UNet2DConditionModel(nn.Module):
             nn.AvgPool2d(kernel_size=5, stride=1, padding=2),  # 5x5 average pooling
             nn.MaxPool2d(kernel_size=7, stride=1, padding=3),  # 7x7 max pooling
             nn.AvgPool2d(kernel_size=9, stride=1, padding=4),  # 9x9 average pooling
-            nn.Conv2d(sample.shape[1], sample.shape[1] // 2, kernel_size=1),  # 1x1 convolution
+            #nn.Conv2d(sample.shape[1], sample.shape[1] // 2, kernel_size=1),  # 1x1 convolution
         )
 
         # Apply the SPP layer to the sample tensor
