@@ -1100,7 +1100,7 @@ class BaseDataset(torch.utils.data.Dataset):
         return imagesize.get(image_path)
 
     def load_image_with_face_info(self, subset: BaseSubset, image_path: str):
-        img = load_image_tr(image_path,0.65)
+        img = load_image(image_path)
 
         face_cx = face_cy = face_w = face_h = 0
         if subset.face_crop_aug_range is not None:
