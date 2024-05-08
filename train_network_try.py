@@ -949,6 +949,7 @@ class NetworkTrainer:
                         target = noise
                     if(is_posivate):
                         loss = train_util.contrastive_loss(noise_pred, pos_noise_pred, labels, 0.7)
+                        logger.info(f"contrastive_loss: {contrastive_loss}")
                     else:
                         loss = train_util.conditional_loss(
                             noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c
