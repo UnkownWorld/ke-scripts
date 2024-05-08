@@ -1527,10 +1527,14 @@ class UNet2DConditionModel(nn.Module):
         """
         # Define the SPP layer
         spp_layer = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=1, padding=1),  # 3x3 max pooling
+            nn.AvgPool2d(kernel_size=3, stride=1, padding=1),  # 3x3 max pooling
             nn.AvgPool2d(kernel_size=5, stride=1, padding=2),  # 5x5 average pooling
-            nn.MaxPool2d(kernel_size=7, stride=1, padding=3),  # 7x7 max pooling
+            nn.AvgPool2d(kernel_size=7, stride=1, padding=3),  # 7x7 max pooling
             nn.AvgPool2d(kernel_size=9, stride=1, padding=4),  # 9x9 average pooling
+            nn.AvgPool2d(kernel_size=11, stride=1, padding=5),  # 3x3 max pooling
+            nn.AvgPool2d(kernel_size=13, stride=1, padding=6),  # 5x5 average pooling
+            nn.AvgPool2d(kernel_size=15, stride=1, padding=7),  # 7x7 max pooling
+            nn.AvgPool2d(kernel_size=17, stride=1, padding=8),  # 9x9 average pooling
             #nn.Conv2d(sample.shape[1], sample.shape[1] // 2, kernel_size=1),  # 1x1 convolution
         )
 
