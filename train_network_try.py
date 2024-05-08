@@ -846,9 +846,11 @@ class NetworkTrainer:
                     is_posivate = True
                     positive_step = math.ceil(num_update_steps_per_epoch * weight)
                     positive_steps = random.sample(range(num_update_steps_per_epoch-1), posivate_step)
+                    positive_steps = []
                 else:
                     posivate_step = 0
                     is_posivate = False
+                    positive_steps = []
             else:
                 posivate_step = 0
                 is_posivate = False
