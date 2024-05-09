@@ -1521,7 +1521,7 @@ class UNet2DConditionModel(nn.Module):
             logger.info(f"{module.__class__.__name__} {module.gradient_checkpointing} -> {value}")
             module.gradient_checkpointing = value
           
-  def add_spp_layer(self, sample: torch.FloatTensor) -> torch.FloatTensor:
+    def add_spp_layer(self, sample: torch.FloatTensor) -> torch.FloatTensor:
         r"""
         Adds Spatial Pyramid Pooling (SPP) layer to the sample tensor.
         """
@@ -1533,7 +1533,6 @@ class UNet2DConditionModel(nn.Module):
             nn.AvgPool2d(kernel_size=9, stride=1, padding=4),  # 9x9 average pooling
             #nn.Conv2d(sample.shape[1], sample.shape[1] // 2, kernel_size=1),  # 1x1 convolution
         )
-
         # Apply the SPP layer to the sample tensor
         sample = spp_layer(sample)
         return sample * 0.2
