@@ -1387,7 +1387,9 @@ class UNet2DConditionModel(nn.Module):
         logger.info(
             f"UNet2DConditionModel: {sample_size}, {attention_head_dim}, {cross_attention_dim}, {use_linear_projection}, {upcast_attention}"
         )
-
+        self.pool_start_weight = [0.6,0.2,0.1] #初始weight
+        self.pool_weight = []    #在初次训练之后获得的每个step的weight值  
+        self.pool_current_weight = [0.6,0.2,0.1]
         # 外部からの参照用に定義しておく
         self.in_channels = IN_CHANNELS
         self.out_channels = OUT_CHANNELS
@@ -1520,7 +1522,24 @@ class UNet2DConditionModel(nn.Module):
         for module in modules:
             logger.info(f"{module.__class__.__name__} {module.gradient_checkpointing} -> {value}")
             module.gradient_checkpointing = value
-          
+    #调整权重
+    def adjust_array_proportionally(arr, reduce_val, reduce_index = 0):
+        # 从要减少的元素中减去指定的值
+        arr[reduce_index] -= reduce_val
+        remaining_sum = sum(arr) - arr[reduce_index]
+        add_val = reduce_val / (len(arr) - 1)
+        for i in range(len(arr)):
+            if i != reduce_index:
+                arr[i] += add_val
+        arr[reduce_index] = 1 - remaining_sum - (len(arr) - 1) * add_val
+        return arr
+    def set_pool_weight(self,loss,is_first,steps):
+        if(is_first):
+            self.pool_weight.append(self.pool_current_weight)
+        else:
+            self.pool_current_weight = adjust_array_proportionally(self.pool_weight[steps],loss)
+            self.pool_weight[steps] = self.pool_current_weight
+        
     def add_spp_layer(self, sample: torch.FloatTensor) -> torch.FloatTensor:
         r"""
         Adds Spatial Pyramid Pooling (SPP) layer to the sample tensor.
@@ -1535,10 +1554,10 @@ class UNet2DConditionModel(nn.Module):
         )
         # Apply the SPP layer to the sample tensor
         sample = spp_layer(sample)
-        return sample * 0.2
+        return sample
     def addmaxpool(self, sample: torch.FloatTensor) -> torch.FloatTensor:
       max_pool_layer = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
-      return (max_pool_layer(sample)-max_pool_layer(-sample)) * 0.1
+      return (max_pool_layer(sample)-max_pool_layer(-sample))
     # endregion
 
     def forward(
@@ -1624,7 +1643,7 @@ class UNet2DConditionModel(nn.Module):
         # 4. mid
         sample = self.mid_block(sample, emb, encoder_hidden_states=encoder_hidden_states)
         # Add SPP layer
-        sample = sample * 0.6 + self.add_spp_layer(sample) + self.addmaxpool(sample)
+        sample = sample * self.pool_current_weight[0] + self.add_spp_layer(sample) * self.pool_current_weight[1] + self.addmaxpool(sample) * self.pool_current_weight[2]
         # ControlNetの出力を追加する
         if mid_block_additional_residual is not None:
             sample += mid_block_additional_residual
