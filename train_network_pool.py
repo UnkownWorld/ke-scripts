@@ -809,7 +809,7 @@ class NetworkTrainer:
 
             for step, batch in enumerate(train_dataloader):
                 current_step.value = global_step
-                if is_first:
+                if is_first_epoch:
                     unet.set_pool_weight(0,is_first_epoch,step)
                 else:
                     unet.set_pool_weight(reduce_loss,is_first_epoch,step)
