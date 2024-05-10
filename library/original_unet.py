@@ -1523,7 +1523,7 @@ class UNet2DConditionModel(nn.Module):
             logger.info(f"{module.__class__.__name__} {module.gradient_checkpointing} -> {value}")
             module.gradient_checkpointing = value
     #调整权重
-    def adjust_array_proportionally(arr, reduce_val, reduce_index = 0):
+    def adjust_array_proportionally(self, arr, reduce_val, reduce_index = 0):
         # 从要减少的元素中减去指定的值
         arr[reduce_index] -= reduce_val
         remaining_sum = sum(arr) - arr[reduce_index]
@@ -1537,7 +1537,7 @@ class UNet2DConditionModel(nn.Module):
         if(is_first):
             self.pool_weight.append(self.pool_current_weight)
         else:
-            self.pool_current_weight = adjust_array_proportionally(self.pool_weight[steps],loss)
+            self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[steps],loss)
             self.pool_weight[steps] = self.pool_current_weight
         
     def add_spp_layer(self, sample: torch.FloatTensor) -> torch.FloatTensor:
