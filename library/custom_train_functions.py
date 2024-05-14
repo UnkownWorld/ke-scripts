@@ -487,7 +487,9 @@ def generate_fractal_noise(batch_size, channels, height, width, latents, fractal
         fractal_noise = torch.randn((batch_size, channels, height, width), device=device)
         for i in range(1, height):
             for j in range(1, width):
-                fractal_noise[:, :, i, j] += fractal_noise[:, :, i - 1, j] + fractal_noise[:, :, i, j - 1] + fractal_noise[:, :, i - 1, j - 1]
+                # 计算每个像素的增量
+                increment = torch.randn((batch_size, channels, 1, 1), device=device)
+                fractal_noise[:, :, i, j] = 0.25 * (fractal_noise[:, :, i - 1, j] + fractal_noise[:, :, i, j - 1] + fractal_noise[:, :, i - 1, j - 1] + increment.squeeze(dim=3).squeeze(dim=2))
     
     elif fractal_type == 'brownian':
         # 生成分形布朗运动（红噪声）
@@ -503,6 +505,7 @@ def generate_fractal_noise(batch_size, channels, height, width, latents, fractal
     # 将噪声张量缩放到[0, 1]之间
     fractal_noise -= fractal_noise.min()
     fractal_noise /= fractal_noise.max()
+    
     return fractal_noise
 
 
