@@ -525,7 +525,7 @@ def apply_noise_for_peil(latents,noise):
     red_noise = generate_fractal_noise(batch_size, channels, height, width, latents, fractal_type='brownian')
     logger.info(f"fix combined_noise1 {red_noise}")
     # 将三种噪声相加并返回
-    combined_noise = 0.6 * noise + 0.2 * poisson_noise + 0.1 * blue_noise + 0.1 * red_noise
+    combined_noise = noise + poisson_noise + blue_noise + red_noise
     #logger.info(f"fix combined_noise {combined_noise}")
     return combined_noise
 
