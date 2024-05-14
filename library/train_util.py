@@ -4934,7 +4934,7 @@ def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents):
             noise, latents.device, args.multires_noise_iterations, args.multires_noise_discount
         )
     if args.noise_for_peil : 
-        noise = custom_train_functions.apply_noise_for_peil(latents)
+        noise = custom_train_functions.apply_noise_for_peil(latents,noise)
     # Sample a random timestep for each image
     b_size = latents.shape[0]
     min_timestep = 0 if args.min_timestep is None else args.min_timestep
