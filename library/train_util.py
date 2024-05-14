@@ -4920,7 +4920,7 @@ def get_timesteps_and_huber_c(args, min_timestep, max_timestep, noise_scheduler,
     return timesteps, huber_c
 
 
-def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents):
+def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents,epoch = 0):
     # Sample noise that we'll add to the latents
     noise = torch.randn_like(latents, device=latents.device)
     if args.noise_offset:
@@ -4933,7 +4933,7 @@ def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents):
         noise = custom_train_functions.pyramid_noise_like(
             noise, latents.device, args.multires_noise_iterations, args.multires_noise_discount
         )
-    if args.noise_for_peil : 
+    if args.noise_for_peil and epoch % 3 != 0 : 
         noise = custom_train_functions.apply_noise_for_peil(latents,noise)
     # Sample a random timestep for each image
     b_size = latents.shape[0]
