@@ -4933,7 +4933,7 @@ def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents,epoch =
         noise = custom_train_functions.pyramid_noise_like(
             noise, latents.device, args.multires_noise_iterations, args.multires_noise_discount
         )
-    logger.info(f".noise_for_peil,{args.noise_for_peil}_{epoch % 3 != 0}")
+    logger.info(f".noise_for_peil,{args.noise_for_peil}_{(epoch % 3)}")
     if args.noise_for_peil and epoch % 3 != 0 : 
         logger.info(f".noise_for_peil")
         noise = custom_train_functions.apply_noise_for_peil(latents,noise)
