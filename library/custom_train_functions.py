@@ -482,7 +482,7 @@ def generate_fractal_noise(batch_size, channels, height, width, fractal_type='wi
     if fractal_type == 'wiener':
         # 生成分形维纳过程（蓝噪声）
         # 这里使用简单的随机行走算法示例，实际中可能需要更复杂的算法
-        fractal_noise = torch.randn((batch_size, channels, height, width))
+        fractal_noise = torch.randn((batch_size, channels, height, width),device=latents.device)
         for i in range(1, height):
             for j in range(1, width):
                 fractal_noise[:, :, i, j] += fractal_noise[:, :, i - 1, j] + fractal_noise[:, :, i, j - 1] + fractal_noise[:, :, i - 1, j - 1]
@@ -491,16 +491,18 @@ def generate_fractal_noise(batch_size, channels, height, width, fractal_type='wi
         # 生成分形布朗运动（红噪声）
         # 这里使用简化的多维傅里叶变换和变分方法示例，实际中可能需要更复杂的算法
         # 生成初始噪声场
-        noise = torch.randn(batch_size, channels, height, width)
+        noise = torch.randn(batch_size, channels, height, width,device=latents.device)
         noise = torch.fft.fft2(noise, dim=(-2, -1))
 
         # 计算频率分布
         freq_y = np.fft.fftfreq(height).reshape(-1, 1)
         freq_x = np.fft.fftfreq(width).reshape(1, -1)
         freq = np.sqrt(freq_y ** 2 + freq_x ** 2)
-
         # 计算分形布朗运动的功率谱
-        power_spectrum = np.where(freq > 0, 1 / freq ** 2.0, 0)
+        if freq.any() == 0:
+            power_spectrum = np.zeros_like(freq)  # 如果频率为0，将功率谱设置为零
+        else:
+            power_spectrum = 1 / freq ** 2.0
 
         # 生成随机相位
         phase = np.exp(1j * np.random.uniform(0, 2 * np.pi, size=(batch_size, channels, height, width)))
