@@ -479,12 +479,8 @@ def apply_noise_offset(latents, noise, noise_offset, adaptive_noise_scale):
     noise = noise + noise_offset * torch.randn((latents.shape[0], latents.shape[1], 1, 1), device=latents.device)
     return noise
 
-import torch
-import numpy as np
-
 def generate_fractal_noise(batch_size, channels, height, width, latents, fractal_type='wiener'):
     device = latents.device
-    
     if fractal_type == 'wiener':
         # 生成分形维纳过程（蓝噪声）
         fractal_noise = torch.randn((batch_size, channels, height, width), device=device)
@@ -523,7 +519,7 @@ def apply_noise_for_peil(latents,noise):
     # 计算噪声的形状
     batch_size, channels, height, width = latents.shape    
     device = latents.device
-    
+    logger.info(noise, 1, len(noise))
     # 生成泊松噪声
     poisson_noise = torch.poisson(torch.ones((batch_size, channels, height, width), device=device))
     
@@ -535,6 +531,7 @@ def apply_noise_for_peil(latents,noise):
     
     # 将三种噪声相加并返回
     combined_noise = noise + poisson_noise + blue_noise + red_noise
+    logger.info(combined_noise, 1, len(combined_noise))
     return combined_noise
 
 
