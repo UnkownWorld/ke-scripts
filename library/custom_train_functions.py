@@ -513,7 +513,7 @@ def apply_noise_for_peil(latents,noise):
     # 计算噪声的形状
     batch_size, channels, height, width = latents.shape    
     device = latents.device
-    #logger.info(f"fix noise {noise}")
+    logger.info(f"fix noise {noise.max()},{noise.min()}")
     # 生成泊松噪声
     poisson_noise = torch.poisson(torch.ones((batch_size, channels, height, width), device=device)) / 255.0
     poisson_noise = 2 * (poisson_noise - poisson_noise.min()) / (poisson_noise.max() - poisson_noise.min()) - 1  # 缩放到[-1, 1]之间
