@@ -2,9 +2,10 @@ import torch
 import argparse
 import random
 import re
+import numpy as np
 from typing import List, Optional, Union
 from .utils import setup_logging
-
+from scipy.stats import norm
 setup_logging()
 import logging
 
@@ -477,7 +478,57 @@ def apply_noise_offset(latents, noise, noise_offset, adaptive_noise_scale):
 
     noise = noise + noise_offset * torch.randn((latents.shape[0], latents.shape[1], 1, 1), device=latents.device)
     return noise
+def generate_fractal_noise(batch_size, channels, height, width, fractal_type='wiener'):
+    if fractal_type == 'wiener':
+        # 生成分形维纳过程（蓝噪声）
+        # 这里使用简单的随机行走算法示例，实际中可能需要更复杂的算法
+        fractal_noise = torch.randn((batch_size, channels, height, width))
+        for i in range(1, height):
+            for j in range(1, width):
+                fractal_noise[:, :, i, j] += fractal_noise[:, :, i - 1, j] + fractal_noise[:, :, i, j - 1] + fractal_noise[:, :, i - 1, j - 1]
+    
+    elif fractal_type == 'brownian':
+        # 生成分形布朗运动（红噪声）
+        # 这里使用简化的多维傅里叶变换和变分方法示例，实际中可能需要更复杂的算法
+        # 生成初始噪声场
+        noise = torch.randn(batch_size, channels, height, width)
+        noise = torch.fft.fft2(noise, dim=(-2, -1))
 
+        # 计算频率分布
+        freq_y = np.fft.fftfreq(height).reshape(-1, 1)
+        freq_x = np.fft.fftfreq(width).reshape(1, -1)
+        freq = np.sqrt(freq_y ** 2 + freq_x ** 2)
+
+        # 计算分形布朗运动的功率谱
+        power_spectrum = np.where(freq > 0, 1 / freq ** 2.0, 0)
+
+        # 生成随机相位
+        phase = np.exp(1j * np.random.uniform(0, 2 * np.pi, size=(batch_size, channels, height, width)))
+
+        # 将功率谱和相位结合，进行逆傅里叶变换得到分形布朗运动
+        fractal_noise = np.fft.ifft2(power_spectrum * phase, axes=(-2, -1))
+        fractal_noise = torch.tensor(fractal_noise.real, dtype=torch.float32)
+
+    else:
+        raise ValueError("Unsupported fractal type. Supported types are 'brownian' and 'wiener'.")
+    
+    return fractal_noise
+
+def apply_noise_for_peil(latents):
+    # 计算噪声的形状
+    batch_size, channels, height, width = latents.shape    
+    # 生成泊松噪声
+    poisson_noise = torch.poisson(torch.ones((batch_size, channels, height, width), device=latents.device))
+    
+    # 生成蓝噪声
+    blue_noise = generate_fractal_noise(batch_size, channels, height, width, fractal_type='wiener')
+    
+    # 生成红噪声
+    red_noise = generate_fractal_noise(batch_size, channels, height, width, fractal_type='brownian')
+    
+    # 将三种噪声相加并返回
+    combined_noise = poisson_noise + blue_noise + red_noise
+    return combined_noise
 
 def apply_masked_loss(loss, batch):
     # mask image is -1 to 1. we need to convert it to 0 to 1
