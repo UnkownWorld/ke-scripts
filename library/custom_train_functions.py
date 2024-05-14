@@ -512,7 +512,8 @@ def generate_fractal_noise(batch_size, channels, height, width, latents, fractal
 
     else:
         raise ValueError("Unsupported fractal type. Supported types are 'brownian' and 'wiener'.")
-    
+    # 将噪声张量缩放到[-1, 1]之间
+    fractal_noise = 2 * (fractal_noise - fractal_noise.min()) / (fractal_noise.max() - fractal_noise.min()) - 1
     return fractal_noise
 
 def apply_noise_for_peil(latents,noise):
@@ -521,7 +522,8 @@ def apply_noise_for_peil(latents,noise):
     device = latents.device
     #logger.info(f"fix noise {noise}")
     # 生成泊松噪声
-    poisson_noise = torch.poisson(torch.ones((batch_size, channels, height, width), device=device))
+    poisson_noise = torch.poisson(torch.ones((batch_size, channels, height, width), device=device)) / 255.0
+    poisson_noise = 2 * (poisson_noise - poisson_noise.min()) / (poisson_noise.max() - poisson_noise.min()) - 1  # 缩放到[-1, 1]之间
     logger.info(f"fix combined_noise1 {poisson_noise}")
     #生成蓝噪声
     blue_noise = generate_fractal_noise(batch_size, channels, height, width, latents, fractal_type='wiener')
