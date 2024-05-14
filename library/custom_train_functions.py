@@ -519,7 +519,7 @@ def generate_fractal_noise(batch_size, channels, height, width, latents, fractal
     
     return fractal_noise
 
-def apply_noise_for_peil(latents):
+def apply_noise_for_peil(latents,noise):
     # 计算噪声的形状
     batch_size, channels, height, width = latents.shape    
     device = latents.device
@@ -534,7 +534,7 @@ def apply_noise_for_peil(latents):
     red_noise = generate_fractal_noise(batch_size, channels, height, width, latents, fractal_type='brownian')
     
     # 将三种噪声相加并返回
-    combined_noise = poisson_noise + blue_noise + red_noise
+    combined_noise = noise + poisson_noise + blue_noise + red_noise
     return combined_noise
 
 
