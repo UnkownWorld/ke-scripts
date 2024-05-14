@@ -527,7 +527,7 @@ def apply_noise_for_peil(latents,noise):
     # 将三种噪声相加并返回
     combined_noise = noise + poisson_noise + blue_noise + red_noise
     #logger.info(f"fix combined_noise {combined_noise}")
-        logger.info(f"fix noise {combined_noise.max()},{combined_noise.min()}")
+    logger.info(f"fix noise {combined_noise.max()},{combined_noise.min()}")
     return combined_noise
 
 
