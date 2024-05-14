@@ -479,6 +479,7 @@ def apply_noise_offset(latents, noise, noise_offset, adaptive_noise_scale):
     noise = noise + noise_offset * torch.randn((latents.shape[0], latents.shape[1], 1, 1), device=latents.device)
     return noise
 
+
 def generate_fractal_noise(batch_size, channels, height, width, latents, fractal_type='wiener'):
     device = latents.device
     if fractal_type == 'wiener':
@@ -493,28 +494,17 @@ def generate_fractal_noise(batch_size, channels, height, width, latents, fractal
         noise = torch.randn(batch_size, channels, height, width, device=device)
         noise = torch.fft.fft2(noise, dim=(-2, -1))
 
-        # 计算频率分布
-        freq_y = np.fft.fftfreq(height).reshape(-1, 1)
-        freq_x = np.fft.fftfreq(width).reshape(1, -1)
-        freq = np.sqrt(freq_y ** 2 + freq_x ** 2)
-        # 计算分形布朗运动的功率谱
-        if freq.any() == 0:
-            power_spectrum = np.zeros_like(freq)  # 如果频率为0，将功率谱设置为零
-        else:
-            power_spectrum = 1 / freq ** 2.0
-
         # 生成随机相位
-        phase = np.exp(1j * np.random.uniform(0, 2 * np.pi, size=(batch_size, channels, height, width)))
+        phase = torch.empty(batch_size, channels, height, width, device=device).uniform_(0, 2 * np.pi)
 
         # 将功率谱和相位结合，进行逆傅里叶变换得到分形布朗运动
-        fractal_noise = np.fft.ifft2(power_spectrum * phase, axes=(-2, -1))
-        fractal_noise = torch.tensor(fractal_noise.real, dtype=torch.float32, device=device)
-
-    else:
-        raise ValueError("Unsupported fractal type. Supported types are 'brownian' and 'wiener'.")
-    # 将噪声张量缩放到[-1, 1]之间
-    fractal_noise = 2 * (fractal_noise - fractal_noise.min()) / (fractal_noise.max() - fractal_noise.min()) - 1
+        fractal_noise = torch.fft.ifft2(torch.sqrt(1 / (1 + noise**2)) * torch.exp(1j * phase), dim=(-2, -1)).real
+    
+    # 将噪声张量缩放到[0, 1]之间
+    fractal_noise -= fractal_noise.min()
+    fractal_noise /= fractal_noise.max()
     return fractal_noise
+
 
 def apply_noise_for_peil(latents,noise):
     # 计算噪声的形状
