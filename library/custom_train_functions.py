@@ -517,16 +517,17 @@ def apply_noise_for_peil(latents,noise):
     # 生成泊松噪声
     poisson_noise = torch.poisson(torch.ones((batch_size, channels, height, width), device=device)) / 255.0
     poisson_noise = 2 * (poisson_noise - poisson_noise.min()) / (poisson_noise.max() - poisson_noise.min()) - 1  # 缩放到[-1, 1]之间
-    logger.info(f"fix combined_noise1 {poisson_noise}")
+    #logger.info(f"fix combined_noise1 {poisson_noise}")
     #生成蓝噪声
     blue_noise = generate_fractal_noise(batch_size, channels, height, width, latents, fractal_type='wiener')
-    logger.info(f"fix combined_noise1 {blue_noise}")
+    #logger.info(f"fix combined_noise1 {blue_noise}")
     # 生成红噪声
     red_noise = generate_fractal_noise(batch_size, channels, height, width, latents, fractal_type='brownian')
-    logger.info(f"fix combined_noise1 {red_noise}")
+    #logger.info(f"fix combined_noise1 {red_noise}")
     # 将三种噪声相加并返回
     combined_noise = noise + poisson_noise + blue_noise + red_noise
     #logger.info(f"fix combined_noise {combined_noise}")
+        logger.info(f"fix noise {combined_noise.max()},{combined_noise.min()}")
     return combined_noise
 
 
