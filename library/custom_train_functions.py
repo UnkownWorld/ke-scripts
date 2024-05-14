@@ -522,8 +522,8 @@ def apply_noise_for_peil(latents,noise):
     #logger.info(f"fix noise {noise}")
     # 生成泊松噪声
     poisson_noise = torch.poisson(torch.ones((batch_size, channels, height, width), device=device))
-    #logger.info(f"fix combined_noise1 {poisson_noise}")
-     生成蓝噪声
+    logger.info(f"fix combined_noise1 {poisson_noise}")
+    #生成蓝噪声
     blue_noise = generate_fractal_noise(batch_size, channels, height, width, latents, fractal_type='wiener')
     logger.info(f"fix combined_noise1 {blue_noise}")
     # 生成红噪声
