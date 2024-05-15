@@ -4968,7 +4968,11 @@ def conditional_loss(
     if loss_type == "l2":
         loss = torch.nn.functional.mse_loss(model_pred, target, reduction=reduction)
     elif loss_type == "huber":
-        loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
+        #loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
+        diff = model_pred - target
+        abs_diff = torch.abs(diff)
+        loss = torch.where(diff >= 0, torch.where(abs_diff < huber_c, 0.5 * diff ** 2, huber_c * (abs_diff - 0.5 * huber_c)), torch.where(abs_diff < huber_c, 0.5 * diff ** 2, -huber_c * (abs_diff - 0.5 * huber_c)))
+        
         if reduction == "mean":
             loss = torch.mean(loss)
         elif reduction == "sum":
