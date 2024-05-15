@@ -795,6 +795,7 @@ class NetworkTrainer:
         before_loss = []
         reduce_loss = 0
         is_first_epoch = True
+        peil_ep = 4 * num_train_epochs / 5
         # training loop
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
@@ -859,7 +860,7 @@ class NetworkTrainer:
                     # Sample noise, sample a random timestep for each image, and add noise to the latents,
                     # with noise offset and/or multires noise if specified
                     noise, noisy_latents, timesteps, huber_c = train_util.get_noise_noisy_latents_and_timesteps(
-                        args, noise_scheduler, latents,epoch = epoch
+                        args, noise_scheduler, latents,is_peil = peil_ep <= epoch
                     )
 
                     # ensure the hidden state will require grad
