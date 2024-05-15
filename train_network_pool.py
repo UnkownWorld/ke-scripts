@@ -795,7 +795,7 @@ class NetworkTrainer:
         before_loss = []
         reduce_loss = 0
         is_first_epoch = True
-        peil_ep = 4 * num_train_epochs / 5
+        peil_ep = 0.9 * num_train_epochs
         # training loop
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
