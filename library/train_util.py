@@ -4973,7 +4973,7 @@ def conditional_loss(
         abs_diff = torch.abs(diff)
         loss = torch.where(diff >= 0, 
                            2 * huber_c * (torch.sqrt((diff) ** 2 + huber_c**2) - huber_c), 
-                           -2 * huber_c * (torch.sqrt((diff) ** 2 + huber_c**2) + huber_c))
+                           2 * huber_c * (-torch.sqrt((diff) ** 2 + huber_c**2) + huber_c))
         #loss = torch.where(diff >= 0, 
         #                    torch.where(abs_diff < huber_c, diff ** 2, huber_c * (abs_diff - 0.5 * huber_c)), 
         #                   torch.where(abs_diff < huber_c, -diff ** 2, -huber_c * (abs_diff - 0.5 * huber_c)))
