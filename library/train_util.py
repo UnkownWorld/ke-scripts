@@ -3207,6 +3207,18 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         help="use rnoise_for_peil。",
     )
     parser.add_argument(
+        "--peil_weight",
+        type=float,
+        default=0.05,
+        help="peil weight",
+    )
+    parser.add_argument(
+        "--peil_sin_weight",
+        type=int,
+        default=1,
+        help="peil weight",
+    )
+    parser.add_argument(
         "--multires_noise_iterations",
         type=int,
         default=None,
@@ -4920,7 +4932,7 @@ def get_timesteps_and_huber_c(args, min_timestep, max_timestep, noise_scheduler,
     return timesteps, huber_c
 
 
-def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents,is_peil = False):
+def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents,peil_weight = 0.0):
     # Sample noise that we'll add to the latents
     noise = torch.randn_like(latents, device=latents.device)
     if args.noise_offset:
@@ -4933,8 +4945,8 @@ def get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents,is_peil
         noise = custom_train_functions.pyramid_noise_like(
             noise, latents.device, args.multires_noise_iterations, args.multires_noise_discount
         )
-    if args.noise_for_peil and is_peil : 
-        noise = custom_train_functions.apply_noise_for_peil(latents,noise)
+    if args.noise_for_peil : 
+        noise = custom_train_functions.apply_noise_for_peil(latents,noise,peil_weight)
     # Sample a random timestep for each image
     b_size = latents.shape[0]
     min_timestep = 0 if args.min_timestep is None else args.min_timestep
