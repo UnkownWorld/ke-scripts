@@ -801,6 +801,7 @@ class NetworkTrainer:
         unet.set_max_steps(num_update_steps_per_epoch - 1)
         # training loop
         for epoch in range(num_train_epochs):
+            unet.get_pool_weight()
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
             if epoch == 0:
