@@ -1131,11 +1131,12 @@ def setup_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
+    print("test1)
     parser = setup_parser()
-
+    
     args = parser.parse_args()
     train_util.verify_command_line_training_args(args)
     args = train_util.read_config_from_file(args, parser)
-
+    print("test2)
     trainer = NetworkTrainer()
     trainer.train(args)
