@@ -1539,6 +1539,8 @@ class UNet2DConditionModel(nn.Module):
         else:
             self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[steps],loss)
             self.pool_weight[steps] = self.pool_current_weight
+    def get_pool_weight(self):
+        return self.pool_weight
         
     def add_spp_layer(self, sample: torch.FloatTensor) -> torch.FloatTensor:
         r"""
