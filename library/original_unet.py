@@ -1387,6 +1387,7 @@ class UNet2DConditionModel(nn.Module):
         logger.info(
             f"UNet2DConditionModel: {sample_size}, {attention_head_dim}, {cross_attention_dim}, {use_linear_projection}, {upcast_attention}"
         )
+        self.current_step = 0
         self.pool_start_weight = [0.6,0.2,0.1] #初始weight
         self.pool_weight = []    #在初次训练之后获得的每个step的weight值  
         self.pool_current_weight = [0.6,0.2,0.1]
@@ -1535,20 +1536,21 @@ class UNet2DConditionModel(nn.Module):
         return arr
     def set_pool_start_weight(self,pool_start_weight):
         self.pool_start_weight = pool_start_weight
-        logger.info(f"set_pool_start_weight, {self.pool_start_weight}")
+        self.pool_current_weight = self.pool_start_weight
       
     def set_pool_weight(self,loss,is_first,steps):
         if(is_first):
             self.pool_weight.append(self.pool_current_weight)
         else:
-            logger.info(f"set_pool_weight_loss, {loss}")
-            logger.info(f"set_pool_weight_loss, {self.pool_current_weight}")
+            #logger.info(f"set_pool_weight_loss, {loss}")
+            $logger.info(f"set_pool_weight_loss, {self.pool_current_weight}")
             self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[steps],loss)
             self.pool_weight[steps] = self.pool_current_weight
-            logger.info(f"set_pool_weight_loss2, {self.pool_current_weight},step,{self.pool_weight[steps]}")
+            #logger.info(f"set_pool_weight_loss2, {self.pool_current_weight},step,{self.pool_weight[steps]}")
     def get_pool_weight(self):
         return self.pool_weight
-        
+    def set_current_step(self,current_step):
+        self.current_step = current_step
     def add_spp_layer(self, sample: torch.FloatTensor) -> torch.FloatTensor:
         r"""
         Adds Spatial Pyramid Pooling (SPP) layer to the sample tensor.
@@ -1652,7 +1654,7 @@ class UNet2DConditionModel(nn.Module):
         # 4. mid
         sample = self.mid_block(sample, emb, encoder_hidden_states=encoder_hidden_states)
         # Add SPP layer
-        #logger.info(f"{}self.pool_current_weight, {self.pool_current_weight}")
+        logger.info(f"step:{self.current_step},self.pool_current_weight, {self.pool_current_weight}")
         sample = sample * self.pool_current_weight[0] + self.add_spp_layer(sample) * self.pool_current_weight[1] + self.addmaxpool(sample) * self.pool_current_weight[2]
         # ControlNetの出力を追加する
         if mid_block_additional_residual is not None:
