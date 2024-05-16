@@ -1389,9 +1389,9 @@ class UNet2DConditionModel(nn.Module):
         )
         self.current_step = 0
         self.max_steps = 10
-        self.pool_start_weight = [0.6,0.2,0.1] #初始weight
+        self.pool_start_weight = [0.4,0.2,0.2] #初始weight
         self.pool_weight = []    #在初次训练之后获得的每个step的weight值  
-        self.pool_current_weight = [0.6,0.2,0.1]
+        self.pool_current_weight = [0.4,0.2,0.2]
         # 外部からの参照用に定義しておく
         self.in_channels = IN_CHANNELS
         self.out_channels = OUT_CHANNELS
@@ -1540,8 +1540,9 @@ class UNet2DConditionModel(nn.Module):
         self.pool_current_weight = self.pool_start_weight
       
     def set_pool_weight(self,loss,is_first,step):
+        weight = self.pool_current_weight
         if(is_first):
-            self.pool_weight.append(self.pool_current_weight)
+            self.pool_weight.append(weight)
         else:
             #logger.info(f"set_pool_weight_loss, {loss}")
             #logger.info(f"set_pool_weight_loss, {self.pool_current_weight}")
