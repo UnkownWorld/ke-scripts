@@ -804,6 +804,7 @@ class NetworkTrainer:
                 is_first_epoch = True
             else:
                 is_first_epoch = False
+                logger.info(f"loss weight, {unet.get_pool_weight()}")
             metadata["ss_epoch"] = str(epoch + 1)
 
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
