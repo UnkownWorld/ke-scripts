@@ -798,7 +798,7 @@ class NetworkTrainer:
         is_first_epoch = True
         peil_ep = 2 * math.pi / (num_update_steps_per_epoch - 1) * args.peil_sin_weight
         unet.set_pool_start_weight(args.pool_start_weight)
-        
+        unet.set_max_steps(num_update_steps_per_epoch - 1)
         # training loop
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
@@ -807,14 +807,15 @@ class NetworkTrainer:
                 is_first_epoch = True
             else:
                 is_first_epoch = False
-            logger.info(f"before_loss, {before_loss}")
-            logger.info(f"reduce_loss1, {reduce_loss1}")
-            logger.info(f"loss weight, {unet.get_pool_weight()}")
+            #logger.info(f"before_loss, {before_loss}")
+            #logger.info(f"reduce_loss1, {reduce_loss1}")
+            #logger.info(f"loss weight, {unet.get_pool_weight()}")
             metadata["ss_epoch"] = str(epoch + 1)
 
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
 
             for step, batch in enumerate(train_dataloader):
+                logger.info(f"test_step, {step}")
                 current_step.value = global_step
                 if is_first_epoch:
                     unet.set_pool_weight(0,is_first_epoch,step)
