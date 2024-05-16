@@ -1539,15 +1539,23 @@ class UNet2DConditionModel(nn.Module):
         self.pool_start_weight = pool_start_weight
         self.pool_current_weight = self.pool_start_weight
       
-    def set_pool_weight(self,loss,is_first,steps):
+    def set_pool_weight(self,loss,is_first,step):
         if(is_first):
             self.pool_weight.append(self.pool_current_weight)
         else:
             #logger.info(f"set_pool_weight_loss, {loss}")
             #logger.info(f"set_pool_weight_loss, {self.pool_current_weight}")
-            self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[steps],loss)
-            self.pool_weight[steps] = self.pool_current_weight
-            #logger.info(f"set_pool_weight_loss2, {self.pool_current_weight},step,{self.pool_weight[steps]}")
+            self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[step],loss)
+            self.pool_weight[step] = self.pool_current_weight
+            #logger.info(f"set_pool_weight_loss2, {self.pool_current_weight},step,{self.pool_weight[step]}")
+
+    def set_pool_weights(self,reduces_loss,is_first):
+        for step in range(self.max_steps):
+            if(is_first):
+                self.pool_weight.append(self.pool_current_weight)
+            else:
+                self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[steps],loss)
+                self.pool_weight[steps] = self.pool_current_weight
     def get_pool_weight(self):
         return self.pool_weight
     def set_max_steps(self,max_steps):
