@@ -805,6 +805,7 @@ class NetworkTrainer:
                 is_first_epoch = True
             else:
                 is_first_epoch = False
+                logger.info(f"before_loss, {before_loss}")
                 logger.info(f"loss weight, {unet.get_pool_weight()}")
             metadata["ss_epoch"] = str(epoch + 1)
 
