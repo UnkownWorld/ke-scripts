@@ -107,6 +107,7 @@ v2.1
 """
 
 import math
+import copy
 from types import SimpleNamespace
 from typing import Dict, Optional, Tuple, Union
 import torch
