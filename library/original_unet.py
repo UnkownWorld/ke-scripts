@@ -1388,6 +1388,7 @@ class UNet2DConditionModel(nn.Module):
             f"UNet2DConditionModel: {sample_size}, {attention_head_dim}, {cross_attention_dim}, {use_linear_projection}, {upcast_attention}"
         )
         self.current_step = 0
+        self.max_steps = 10
         self.pool_start_weight = [0.6,0.2,0.1] #初始weight
         self.pool_weight = []    #在初次训练之后获得的每个step的weight值  
         self.pool_current_weight = [0.6,0.2,0.1]
@@ -1549,6 +1550,8 @@ class UNet2DConditionModel(nn.Module):
             #logger.info(f"set_pool_weight_loss2, {self.pool_current_weight},step,{self.pool_weight[steps]}")
     def get_pool_weight(self):
         return self.pool_weight
+    def set_max_steps(self,max_steps):
+        self.max_steps = max_steps
     def set_current_step(self,current_step):
         self.current_step = current_step
     def add_spp_layer(self, sample: torch.FloatTensor) -> torch.FloatTensor:
