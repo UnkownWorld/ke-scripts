@@ -1557,11 +1557,14 @@ class UNet2DConditionModel(nn.Module):
                 self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[steps],loss)
                 self.pool_weight[steps] = self.pool_current_weight
     def get_pool_weight(self):
+        print(f"pool_weight_test = {self.pool_weight}")
         return self.pool_weight
     def set_max_steps(self,max_steps):
         self.max_steps = max_steps
+      
     def set_current_step(self,current_step):
         self.current_step = current_step
+        
     def add_spp_layer(self, sample: torch.FloatTensor) -> torch.FloatTensor:
         r"""
         Adds Spatial Pyramid Pooling (SPP) layer to the sample tensor.
@@ -1578,8 +1581,8 @@ class UNet2DConditionModel(nn.Module):
         sample = spp_layer(sample)
         return sample
     def addmaxpool(self, sample: torch.FloatTensor) -> torch.FloatTensor:
-      max_pool_layer = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
-      return (max_pool_layer(sample)-max_pool_layer(-sample))
+        max_pool_layer = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
+        return (max_pool_layer(sample)-max_pool_layer(-sample))
     # endregion
 
     def forward(
@@ -1665,7 +1668,7 @@ class UNet2DConditionModel(nn.Module):
         # 4. mid
         sample = self.mid_block(sample, emb, encoder_hidden_states=encoder_hidden_states)
         # Add SPP layer
-        logger.info(f"step_testforit:{self.current_step},pool_current_weight_test, {self.pool_current_weight}")
+        #logger.info(f"step_testforit:{self.current_step},pool_current_weight_test, {self.pool_current_weight}")
         sample = sample * self.pool_current_weight[0] + self.add_spp_layer(sample) * self.pool_current_weight[1] + self.addmaxpool(sample) * self.pool_current_weight[2]
         # ControlNetの出力を追加する
         if mid_block_additional_residual is not None:
