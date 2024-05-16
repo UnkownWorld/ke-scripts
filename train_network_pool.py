@@ -793,6 +793,7 @@ class NetworkTrainer:
         self.sample_images(accelerator, args, 0, global_step, accelerator.device, vae, tokenizer, text_encoder, unet)
         #上一次的loss
         before_loss = []
+        reduce_loss1 = []
         reduce_loss = 0
         is_first_epoch = True
         peil_ep = 2 * math.pi / (num_update_steps_per_epoch - 1) * args.peil_sin_weight
@@ -801,11 +802,12 @@ class NetworkTrainer:
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
-            if epoch == 0:
+            if epoch == 0 or epoch == 1:
                 is_first_epoch = True
             else:
                 is_first_epoch = False
                 logger.info(f"before_loss, {before_loss}")
+                logger.info(f"reduce_loss1, {reduce_loss1}")
                 logger.info(f"loss weight, {unet.get_pool_weight()}")
             metadata["ss_epoch"] = str(epoch + 1)
 
@@ -954,12 +956,14 @@ class NetworkTrainer:
                                 remove_ckpt_name = train_util.get_step_ckpt_name(args, "." + args.save_model_as, remove_step_no)
                                 remove_model(remove_ckpt_name)
                 current_loss = loss.detach().item()
-                if(is_first_epoch):
+                if(epoch == 0):
                     reduce_loss = 0
                     before_loss.append(current_loss)
+                    reduce_loss1.append(reduce_loss)
                 else:
                     reduce_loss = current_loss - before_loss[step]
                     before_loss[step]=current_loss
+                    reduce_loss1.append(reduce_loss)
                 loss_recorder.add(epoch=epoch, step=step, loss=current_loss)
                 avr_loss: float = loss_recorder.moving_average
                 logs = {"avr_loss": avr_loss}  # , "lr": lr_scheduler.get_last_lr()[0]}
