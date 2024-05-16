@@ -1541,7 +1541,7 @@ class UNet2DConditionModel(nn.Module):
       
     def set_pool_weight(self,loss,is_first,step):
         if(is_first):
-            weight = copy.deepcopy(self.pool_current_weight）
+            weight = copy.deepcopy(self.pool_current_weight)
             self.pool_weight.append(weight)
         else:
             #logger.info(f"set_pool_weight_loss, {loss}")
