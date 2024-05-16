@@ -804,7 +804,7 @@ class NetworkTrainer:
             unet.get_pool_weight()
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
-            if epoch == 0:
+            if epoch == 0 or epoch == 1:
                 is_first_epoch = True
             else:
                 is_first_epoch = False
@@ -816,8 +816,6 @@ class NetworkTrainer:
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
 
             for step, batch in enumerate(train_dataloader):
-                print("testnn")
-                logger.info(f"test_step, {step}")
                 current_step.value = global_step
                 unet.set_current_step(step)
                 if is_first_epoch:
@@ -1136,9 +1134,7 @@ if __name__ == "__main__":
     parser = setup_parser()
     
     args = parser.parse_args()
-    print("test2")
     train_util.verify_command_line_training_args(args)
     args = train_util.read_config_from_file(args, parser)
-    print("test2")
     trainer = NetworkTrainer()
     trainer.train(args)
