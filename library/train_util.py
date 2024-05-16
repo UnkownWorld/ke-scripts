@@ -3202,6 +3202,13 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         help="use random strength between 0~noise_offset for noise offset. / noise offsetにおいて、0からnoise_offsetの間でランダムな強度を使用します。",
     )
     parser.add_argument(
+        "--pool_start_weight",
+        type=float,
+        nargs='*', 
+        default=[0.4, 0.2, 0.2],
+        help="peil weight",
+    )
+    parser.add_argument(
         "--noise_for_peil",
         action="store_true",
         help="use rnoise_for_peil。",
