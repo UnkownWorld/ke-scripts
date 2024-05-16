@@ -1547,10 +1547,10 @@ class UNet2DConditionModel(nn.Module):
         else:
             #logger.info(f"set_pool_weight_loss, {loss}")
             #logger.info(f"set_pool_weight_loss, {self.pool_current_weight}")
-            print(f"the pool weight try before:{self.pool_weight[step]} and pool_weight {self.pool_weight}")
+            #print(f"the pool weight try before:{self.pool_weight[step]} and pool_weight {self.pool_weight}")
             self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[step],loss)
             self.pool_weight[step] = copy.deepcopy(self.pool_current_weight)
-            print(f"the pool weight try:{self.pool_weight[step]} and pool_weight {self.pool_weight}")
+            #print(f"the pool weight try:{self.pool_weight[step]} and pool_weight {self.pool_weight}")
             #logger.info(f"set_pool_weight_loss2, {self.pool_current_weight},{step},{self.pool_weight[step]}")
 
     def set_pool_weights(self,reduces_loss,is_first):
