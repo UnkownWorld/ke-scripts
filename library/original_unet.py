@@ -1540,8 +1540,11 @@ class UNet2DConditionModel(nn.Module):
         if(is_first):
             self.pool_weight.append(self.pool_current_weight)
         else:
+            logger.info(f"set_pool_weight_loss, {loss}")
+            logger.info(f"set_pool_weight_loss, {self.pool_current_weight}")
             self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[steps],loss)
             self.pool_weight[steps] = self.pool_current_weight
+            logger.info(f"set_pool_weight_loss2, {self.pool_current_weight},step,{self.pool_weight[steps]}")
     def get_pool_weight(self):
         return self.pool_weight
         
