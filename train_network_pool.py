@@ -803,7 +803,7 @@ class NetworkTrainer:
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
-            if epoch == 0 or epoch == 1:
+            if epoch == 0:
                 is_first_epoch = True
             else:
                 is_first_epoch = False
@@ -815,13 +815,13 @@ class NetworkTrainer:
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
 
             for step, batch in enumerate(train_dataloader):
-                logger.info(f"test_step, {step}")
+                logger.info(f"test_step, {global_step}")
                 current_step.value = global_step
+                unet.set_current_step(global_step)
                 if is_first_epoch:
-                    unet.set_pool_weight(0,is_first_epoch,step)
+                    unet.set_pool_weight(0,is_first_epoch,global_step)
                 else:
-                    unet.set_pool_weight(reduce_loss,is_first_epoch,step)
-                unet.set_current_step(step)
+                    unet.set_pool_weight(reduce_loss,is_first_epoch,global_step)
                 with accelerator.accumulate(training_model):
                     on_step_start(text_encoder, unet)
                     
