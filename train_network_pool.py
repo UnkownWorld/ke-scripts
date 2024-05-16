@@ -816,13 +816,13 @@ class NetworkTrainer:
 
             for step, batch in enumerate(train_dataloader):
                 print("testnn")
-                logger.info(f"test_step, {global_step}")
+                logger.info(f"test_step, {step}")
                 current_step.value = global_step
-                unet.set_current_step(global_step)
+                unet.set_current_step(step)
                 if is_first_epoch:
-                    unet.set_pool_weight(0,is_first_epoch,global_step)
+                    unet.set_pool_weight(0,is_first_epoch,step)
                 else:
-                    unet.set_pool_weight(reduce_loss,is_first_epoch,global_step)
+                    unet.set_pool_weight(reduce_loss,is_first_epoch,step)
                 with accelerator.accumulate(training_model):
                     on_step_start(text_encoder, unet)
                     
@@ -1132,7 +1132,6 @@ def setup_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    print("test1")
     parser = setup_parser()
     
     args = parser.parse_args()
