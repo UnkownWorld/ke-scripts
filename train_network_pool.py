@@ -815,6 +815,7 @@ class NetworkTrainer:
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
 
             for step, batch in enumerate(train_dataloader):
+                print("testnn")
                 logger.info(f"test_step, {global_step}")
                 current_step.value = global_step
                 unet.set_current_step(global_step)
