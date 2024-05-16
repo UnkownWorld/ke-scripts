@@ -1651,6 +1651,7 @@ class UNet2DConditionModel(nn.Module):
         # 4. mid
         sample = self.mid_block(sample, emb, encoder_hidden_states=encoder_hidden_states)
         # Add SPP layer
+        logger.info(f"self.pool_current_weight, {self.pool_current_weight}")
         sample = sample * self.pool_current_weight[0] + self.add_spp_layer(sample) * self.pool_current_weight[1] + self.addmaxpool(sample) * self.pool_current_weight[2]
         # ControlNetの出力を追加する
         if mid_block_additional_residual is not None:
