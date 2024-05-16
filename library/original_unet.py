@@ -1533,6 +1533,9 @@ class UNet2DConditionModel(nn.Module):
                 arr[i] += add_val
         arr[reduce_index] = 1 - remaining_sum - (len(arr) - 1) * add_val
         return arr
+    def set_pool_start_weight(self,pool_start_weight):
+        self.pool_start_weight = pool_start_weight
+      
     def set_pool_weight(self,loss,is_first,steps):
         if(is_first):
             self.pool_weight.append(self.pool_current_weight)
