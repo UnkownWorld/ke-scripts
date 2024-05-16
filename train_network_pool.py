@@ -963,7 +963,7 @@ class NetworkTrainer:
                 else:
                     reduce_loss = current_loss - before_loss[step]
                     before_loss[step]=current_loss
-                    reduce_loss1[step](reduce_loss)
+                    reduce_loss1[step] = reduce_loss
                 loss_recorder.add(epoch=epoch, step=step, loss=current_loss)
                 avr_loss: float = loss_recorder.moving_average
                 logs = {"avr_loss": avr_loss}  # , "lr": lr_scheduler.get_last_lr()[0]}
