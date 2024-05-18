@@ -4997,8 +4997,8 @@ def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=5.0):
     ssim_map = ((2 * mu12 + c1) * (2 * sigma12 + c2)) / ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
 
     # SSIM损失
-    ssim_loss = torch.mean(1 - ssim_map)
-    
+    ssim_loss = torch.mean(1 - ssim_map, dim=[0])  # 将损失沿着第0维（批量维度）取平均
+    print(f"test_loss:{ssim_loss}")
     return ssim_loss
     
 # NOTE: if you're using the scheduled version, huber_c has to depend on the timesteps already
