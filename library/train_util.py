@@ -5009,19 +5009,7 @@ def conditional_loss(
     elif loss_type == "huber":
         #loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
         ssim_loss(model_pred,target)
-"""
-        residual = model_pred - target
-        negative_residual_mask = residual < 0
-    
-        # 使用 Huber loss 计算差值为负时的损失，并添加偏置
-        huber_loss = 2 * huber_c * (torch.sqrt((residual) ** 2 + huber_c ** 2) - huber_c)
-    
-        # 使用平方损失计算差值为正时的损失，并添加偏置
-        #squared_loss = (residual ** 2) / 2
-        # 根据差值的正负选择相应的损失
-        #loss = torch.where(negative_residual_mask, torch.exp(huber_loss * (-1)),  torch.log((huber_loss * 10) + torch.e))
-        loss = torch.where(negative_residual_mask, huber_loss - 0.1, huber_loss + 0.1)
-        """
+
         """
         diff = model_pred - target
         abs_diff = torch.abs(diff)
@@ -5036,7 +5024,19 @@ def conditional_loss(
         #loss = torch.where(diff >= 0, 
         #                    torch.where(abs_diff < huber_c, diff ** 2, huber_c * (abs_diff - 0.5 * huber_c)), 
         #                   torch.where(abs_diff < huber_c, -diff ** 2, -huber_c * (abs_diff - 0.5 * huber_c)))
-        
+        """
+        residual = model_pred - target
+        negative_residual_mask = residual < 0
+    
+        # 使用 Huber loss 计算差值为负时的损失，并添加偏置
+        huber_loss = 2 * huber_c * (torch.sqrt((residual) ** 2 + huber_c ** 2) - huber_c)
+    
+        # 使用平方损失计算差值为正时的损失，并添加偏置
+        #squared_loss = (residual ** 2) / 2
+        # 根据差值的正负选择相应的损失
+        #loss = torch.where(negative_residual_mask, torch.exp(huber_loss * (-1)),  torch.log((huber_loss * 10) + torch.e))
+        loss = torch.where(negative_residual_mask, huber_loss - 0.1, huber_loss + 0.1)
+        """
         if reduction == "mean":
             loss = torch.mean(loss)
         elif reduction == "sum":
