@@ -902,7 +902,7 @@ class NetworkTrainer:
                     )
                     if args.masked_loss:
                         loss = apply_masked_loss(loss, batch)
-                    loss = loss.mean([1, 2, 3])
+                    loss = loss.sun([1, 2, 3])
 
                     loss_weights = batch["loss_weights"]  # 各sampleごとのweight
                     loss = loss * loss_weights
@@ -916,7 +916,7 @@ class NetworkTrainer:
                     if args.debiased_estimation_loss:
                         loss = apply_debiased_estimation(loss, timesteps, noise_scheduler)
 
-                    loss = loss.mean()  # 平均なのでbatch_sizeで割る必要なし
+                    loss = loss.sun()  # 平均なのでbatch_sizeで割る必要なし
 
                     accelerator.backward(loss)
                     if accelerator.sync_gradients:
