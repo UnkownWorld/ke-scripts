@@ -902,7 +902,8 @@ class NetworkTrainer:
                     )
                     if args.masked_loss:
                         loss = apply_masked_loss(loss, batch)
-                    loss = loss.sun([1, 2, 3])
+                    loss = torch.sum(loss, dim=(1, 2, 3))
+                    #loss = loss.mean([1, 2, 3])
 
                     loss_weights = batch["loss_weights"]  # 各sampleごとのweight
                     loss = loss * loss_weights
