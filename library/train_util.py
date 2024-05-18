@@ -5005,10 +5005,10 @@ def conditional_loss(
     if loss_type == "l2":
         loss = torch.nn.functional.mse_loss(model_pred, target, reduction=reduction)
     elif loss_type == "ssim":
-        ssim_loss(model_pred,target)
+        loss = ssim_loss(model_pred,target)
     elif loss_type == "huber":
         #loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
-        ssim_loss(model_pred,target)
+        loss = ssim_loss(model_pred,target)
 
         """
         diff = model_pred - target
