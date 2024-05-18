@@ -4978,7 +4978,7 @@ def contrastive_loss(embeddings1, embeddings2, labels, margin=0.8):
     distances = torch.nn.functional.pairwise_distance(embeddings1, embeddings2)
     loss = torch.mean((1 - labels) * torch.pow(distances, 2) + labels * torch.pow(torch.clamp(margin - distances, min=0), 2))
     return loss
-def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=1.0):
+def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=5.0):
     # 图像的均值、方差和协方差
     mu1 = torch.nn.functional.conv2d(img1, torch.ones(1, 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2)
     mu2 = torch.nn.functional.conv2d(img2, torch.ones(1, 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2)
