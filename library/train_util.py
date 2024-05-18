@@ -4981,7 +4981,7 @@ def contrastive_loss(embeddings1, embeddings2, labels, margin=0.8):
 def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=5.0):
     # 图像的均值、方差和协方差
     channels = img1.shape[1]
-    weight = torch.ones(channels, 1, window_size, window_size).to(img1.device) / (window_size ** 2)
+    weight = torch.ones(channels, channels, window_size, window_size).to(img1.device) / (window_size ** 2)
     mu1 = torch.nn.functional.conv2d(img1, weight, padding=window_size // 2)
     mu2 = torch.nn.functional.conv2d(img2, weight, padding=window_size // 2)
     mu1_sq = mu1 ** 2
