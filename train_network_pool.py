@@ -917,8 +917,8 @@ class NetworkTrainer:
                     if args.debiased_estimation_loss:
                         loss = apply_debiased_estimation(loss, timesteps, noise_scheduler)
 
-                    loss = loss.sun()  # 平均なのでbatch_sizeで割る必要なし
-
+                    #loss = loss.mean()  # 平均なのでbatch_sizeで割る必要なし
+                    loss = torch.sum(loss)
                     accelerator.backward(loss)
                     if accelerator.sync_gradients:
                         self.all_reduce_network(accelerator, network)  # sync DDP grad manually
@@ -965,7 +965,7 @@ class NetworkTrainer:
                     before_loss.append(current_loss)
                     reduce_loss1.append(reduce_loss)
                 else:
-                    reduce_loss = (current_loss - before_loss[step]) * 0.1
+                    reduce_loss = (current_loss - before_loss[step]) * args.loss_for_peil
                     before_loss[step]=current_loss
                     reduce_loss1[step] = reduce_loss
                 loss_recorder.add(epoch=epoch, step=step, loss=current_loss)
@@ -1127,6 +1127,12 @@ def setup_parser() -> argparse.ArgumentParser:
         "--no_half_vae",
         action="store_true",
         help="do not use fp16/bf16 VAE in mixed precision (use float VAE) / mixed precisionでも fp16/bf16 VAEを使わずfloat VAEを使う",
+    )
+    parser.add_argument(
+        "--loss_for_peil",
+        type=float,
+        default=0.1,
+        help="Scale the weight of each key pair to help prevent overtraing via exploding gradients. (1 is a good starting point) / 重みの値をスケーリングして勾配爆発を防ぐ（1が初期値としては適当）",
     )
     return parser
 
