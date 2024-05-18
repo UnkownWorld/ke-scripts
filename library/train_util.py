@@ -4978,7 +4978,25 @@ def contrastive_loss(embeddings1, embeddings2, labels, margin=0.8):
     distances = torch.nn.functional.pairwise_distance(embeddings1, embeddings2)
     loss = torch.mean((1 - labels) * torch.pow(distances, 2) + labels * torch.pow(torch.clamp(margin - distances, min=0), 2))
     return loss
+def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=1.0):
+    # 图像的均值、方差和协方差
+    mu1 = torch.nn.functional.conv2d(img1, torch.ones(1, 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2)
+    mu2 = torch.nn.functional.conv2d(img2, torch.ones(1, 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2)
+    mu1_sq = mu1 ** 2
+    mu2_sq = mu2 ** 2
+    mu12 = mu1 * mu2
+    sigma1_sq = torch.nn.functional.conv2d(img1 ** 2, torch.ones(1, 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2) - mu1_sq
+    sigma2_sq = torch.nn.functional.conv2d(img2 ** 2, torch.ones(1, 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2) - mu2_sq
+    sigma12 = torch.nn.functional.conv2d(img1 * img2, torch.ones(1, 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2) - mu12
 
+    # SSIM计算
+    c1 = (0.01 * data_range) ** 2
+    c2 = (0.03 * data_range) ** 2
+    ssim_map = ((2 * mu12 + c1) * (2 * sigma12 + c2)) / ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
+
+    # SSIM损失
+    ssim_loss = torch.mean(1 - ssim_map)
+    
 # NOTE: if you're using the scheduled version, huber_c has to depend on the timesteps already
 def conditional_loss(
     model_pred: torch.Tensor, target: torch.Tensor, reduction: str = "mean", loss_type: str = "l2", huber_c: float = 0.1
@@ -4986,6 +5004,8 @@ def conditional_loss(
 
     if loss_type == "l2":
         loss = torch.nn.functional.mse_loss(model_pred, target, reduction=reduction)
+    elif loss_type == "ssim":
+        ssim_loss(model_pred,target)
     elif loss_type == "huber":
         #loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
 
