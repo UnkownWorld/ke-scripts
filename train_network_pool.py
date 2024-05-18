@@ -964,7 +964,7 @@ class NetworkTrainer:
                     before_loss.append(current_loss)
                     reduce_loss1.append(reduce_loss)
                 else:
-                    reduce_loss = current_loss - before_loss[step]
+                    reduce_loss = before_loss[step] - current_loss
                     before_loss[step]=current_loss
                     reduce_loss1[step] = reduce_loss
                 loss_recorder.add(epoch=epoch, step=step, loss=current_loss)
