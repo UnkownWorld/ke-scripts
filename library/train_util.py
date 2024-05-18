@@ -3283,7 +3283,7 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         "--loss_type",
         type=str,
         default="l2",
-        choices=["l2", "huber", "smooth_l1"],
+        choices=["l2", "huber", "smooth_l1","ssim"],
         help="The type of loss function to use (L2, Huber, or smooth L1), default is L2 / 使用する損失関数の種類（L2、Huber、またはsmooth L1）、デフォルトはL2",
     )
     parser.add_argument(
