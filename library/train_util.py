@@ -4980,14 +4980,14 @@ def contrastive_loss(embeddings1, embeddings2, labels, margin=0.8):
     return loss
 def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=5.0):
     # 图像的均值、方差和协方差
-    mu1 = torch.nn.functional.conv2d(img1, torch.ones(1, 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2)
-    mu2 = torch.nn.functional.conv2d(img2, torch.ones(1, 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2)
+    mu1 = torch.nn.functional.conv2d(img1, torch.ones(img1.shape[1], 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2)
+    mu2 = torch.nn.functional.conv2d(img2, torch.ones(img2.shape[1], 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2)
     mu1_sq = mu1 ** 2
     mu2_sq = mu2 ** 2
     mu12 = mu1 * mu2
-    sigma1_sq = torch.nn.functional.conv2d(img1 ** 2, torch.ones(1, 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2) - mu1_sq
-    sigma2_sq = torch.nn.functional.conv2d(img2 ** 2, torch.ones(1, 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2) - mu2_sq
-    sigma12 = torch.nn.functional.conv2d(img1 * img2, torch.ones(1, 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2) - mu12
+    sigma1_sq = torch.nn.functional.conv2d(img1 ** 2, torch.ones(img1.shape[1], 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2) - mu1_sq
+    sigma2_sq = torch.nn.functional.conv2d(img2 ** 2, torch.ones(img2.shape[1], 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2) - mu2_sq
+    sigma12 = torch.nn.functional.conv2d(img1 * img2, torch.ones(img1.shape[1], 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2) - mu12
 
     # SSIM计算
     c1 = (0.01 * data_range) ** 2
@@ -4996,6 +4996,8 @@ def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=5.0):
 
     # SSIM损失
     ssim_loss = torch.mean(1 - ssim_map)
+    
+    return ssim_loss
     
 # NOTE: if you're using the scheduled version, huber_c has to depend on the timesteps already
 def conditional_loss(
