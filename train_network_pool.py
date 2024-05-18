@@ -917,7 +917,7 @@ class NetworkTrainer:
                     if args.debiased_estimation_loss:
                         loss = apply_debiased_estimation(loss, timesteps, noise_scheduler)
 
-                    loss = loss.mean()/10  # 平均なのでbatch_sizeで割る必要なし
+                    loss = loss.mean()  # 平均なのでbatch_sizeで割る必要なし
                     #loss = torch.sum(loss)
                     accelerator.backward(loss)
                     if accelerator.sync_gradients:
