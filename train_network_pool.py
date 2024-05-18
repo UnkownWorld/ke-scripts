@@ -814,7 +814,7 @@ class NetworkTrainer:
             metadata["ss_epoch"] = str(epoch + 1)
 
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
-
+            print("testforreduceloss",reduce_loss1)
             for step, batch in enumerate(train_dataloader):
                 current_step.value = global_step
                 unet.set_current_step(step)
@@ -964,7 +964,7 @@ class NetworkTrainer:
                     before_loss.append(current_loss)
                     reduce_loss1.append(reduce_loss)
                 else:
-                    reduce_loss = before_loss[step] - current_loss
+                    reduce_loss = current_loss - before_loss[step]
                     before_loss[step]=current_loss
                     reduce_loss1[step] = reduce_loss
                 loss_recorder.add(epoch=epoch, step=step, loss=current_loss)
