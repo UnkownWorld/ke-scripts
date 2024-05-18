@@ -4987,7 +4987,19 @@ def conditional_loss(
     if loss_type == "l2":
         loss = torch.nn.functional.mse_loss(model_pred, target, reduction=reduction)
     elif loss_type == "huber":
-        loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
+        #loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
+
+        residual = model_pred - target
+        negative_residual_mask = residual < 0
+    
+        # 使用 Huber loss 计算差值为负时的损失，并添加偏置
+        huber_loss = 2 * huber_c * (torch.sqrt((residual) ** 2 + huber_c ** 2) - huber_c)
+    
+        # 使用平方损失计算差值为正时的损失，并添加偏置
+        squared_loss = (residual ** 2) / 2
+    
+        # 根据差值的正负选择相应的损失
+        loss = torch.where(negative_residual_mask, huber_loss, squared_loss)
         """
         diff = model_pred - target
         abs_diff = torch.abs(diff)
