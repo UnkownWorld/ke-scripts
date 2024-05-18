@@ -4996,10 +4996,10 @@ def conditional_loss(
         huber_loss = 2 * huber_c * (torch.sqrt((residual) ** 2 + huber_c ** 2) - huber_c)
     
         # 使用平方损失计算差值为正时的损失，并添加偏置
-        squared_loss = (residual ** 2) / 2
+        #squared_loss = (residual ** 2) / 2
     
         # 根据差值的正负选择相应的损失
-        loss = torch.where(negative_residual_mask, huber_loss, squared_loss)
+        loss = torch.where(negative_residual_mask, huber_loss,  huber_loss * 100)
         """
         diff = model_pred - target
         abs_diff = torch.abs(diff)
