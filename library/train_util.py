@@ -4980,14 +4980,16 @@ def contrastive_loss(embeddings1, embeddings2, labels, margin=0.8):
     return loss
 def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=5.0):
     # 图像的均值、方差和协方差
-    mu1 = torch.nn.functional.conv2d(img1, torch.ones(img1.shape[1], 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2)
-    mu2 = torch.nn.functional.conv2d(img2, torch.ones(img2.shape[1], 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2)
+    channels = img1.shape[1]
+    weight = torch.ones(channels, 1, window_size, window_size).to(img1.device) / (window_size ** 2)
+    mu1 = torch.nn.functional.conv2d(img1, weight, padding=window_size // 2)
+    mu2 = torch.nn.functional.conv2d(img2, weight, padding=window_size // 2)
     mu1_sq = mu1 ** 2
     mu2_sq = mu2 ** 2
     mu12 = mu1 * mu2
-    sigma1_sq = torch.nn.functional.conv2d(img1 ** 2, torch.ones(img1.shape[1], 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2) - mu1_sq
-    sigma2_sq = torch.nn.functional.conv2d(img2 ** 2, torch.ones(img2.shape[1], 1, window_size, window_size).to(img2.device) / (window_size ** 2), padding=window_size // 2) - mu2_sq
-    sigma12 = torch.nn.functional.conv2d(img1 * img2, torch.ones(img1.shape[1], 1, window_size, window_size).to(img1.device) / (window_size ** 2), padding=window_size // 2) - mu12
+    sigma1_sq = torch.nn.functional.conv2d(img1 ** 2, weight, padding=window_size // 2) - mu1_sq
+    sigma2_sq = torch.nn.functional.conv2d(img2 ** 2, weight, padding=window_size // 2) - mu2_sq
+    sigma12 = torch.nn.functional.conv2d(img1 * img2, weight, padding=window_size // 2) - mu12
 
     # SSIM计算
     c1 = (0.01 * data_range) ** 2
