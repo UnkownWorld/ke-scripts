@@ -5001,7 +5001,7 @@ def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=1.0):
 def conditional_loss(
     model_pred: torch.Tensor, target: torch.Tensor, reduction: str = "mean", loss_type: str = "l2", huber_c: float = 0.1
 ):
-
+    print(f"testforloss:{model_pred}-----target:{target}")
     if loss_type == "l2":
         loss = torch.nn.functional.mse_loss(model_pred, target, reduction=reduction)
     elif loss_type == "ssim":
