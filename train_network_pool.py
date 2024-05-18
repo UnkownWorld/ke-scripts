@@ -902,8 +902,8 @@ class NetworkTrainer:
                     )
                     if args.masked_loss:
                         loss = apply_masked_loss(loss, batch)
-                    loss = torch.sum(loss, dim=(1, 2, 3))
-                    #loss = loss.mean([1, 2, 3])
+                    #loss = torch.sum(loss, dim=(1, 2, 3))
+                    loss = loss.mean([1, 2, 3])
 
                     loss_weights = batch["loss_weights"]  # 各sampleごとのweight
                     loss = loss * loss_weights
@@ -917,8 +917,8 @@ class NetworkTrainer:
                     if args.debiased_estimation_loss:
                         loss = apply_debiased_estimation(loss, timesteps, noise_scheduler)
 
-                    #loss = loss.mean()  # 平均なのでbatch_sizeで割る必要なし
-                    loss = torch.sum(loss)
+                    loss = loss.mean()  # 平均なのでbatch_sizeで割る必要なし
+                    #loss = torch.sum(loss)
                     accelerator.backward(loss)
                     if accelerator.sync_gradients:
                         self.all_reduce_network(accelerator, network)  # sync DDP grad manually
