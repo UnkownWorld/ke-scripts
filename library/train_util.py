@@ -5008,7 +5008,8 @@ def conditional_loss(
         ssim_loss(model_pred,target)
     elif loss_type == "huber":
         #loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
-
+        ssim_loss(model_pred,target)
+"""
         residual = model_pred - target
         negative_residual_mask = residual < 0
     
@@ -5020,6 +5021,7 @@ def conditional_loss(
         # 根据差值的正负选择相应的损失
         #loss = torch.where(negative_residual_mask, torch.exp(huber_loss * (-1)),  torch.log((huber_loss * 10) + torch.e))
         loss = torch.where(negative_residual_mask, huber_loss - 0.1, huber_loss + 0.1)
+        """
         """
         diff = model_pred - target
         abs_diff = torch.abs(diff)
