@@ -801,6 +801,7 @@ class NetworkTrainer:
         unet.set_max_steps(num_update_steps_per_epoch - 1)
         # training loop
         for epoch in range(num_train_epochs):
+            is_huber_weight = epoch >= args.huber_weight_start
             unet.get_pool_weight()
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
@@ -898,7 +899,7 @@ class NetworkTrainer:
                         target = noise
 
                     loss = train_util.conditional_loss(
-                        noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c
+                        noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c, huber_weight = args.hber_weight,is_huber_weight = is_huber_weight
                     )
                     if args.masked_loss:
                         loss = apply_masked_loss(loss, batch)
