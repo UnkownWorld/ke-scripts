@@ -899,7 +899,7 @@ class NetworkTrainer:
                         target = noise
 
                     loss = train_util.conditional_loss(
-                        noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c, huber_weight = args.hber_weight,is_huber_weight = is_huber_weight
+                        noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c, huber_weight = args.huber_weight,is_huber_weight = is_huber_weight
                     )
                     if args.masked_loss:
                         loss = apply_masked_loss(loss, batch)
