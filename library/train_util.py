@@ -3209,6 +3209,19 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         help="peil weight",
     )
     parser.add_argument(
+        "--huber_weight",
+        type=float,
+        nargs='*', 
+        default=[0.8, 0.2],
+        help="peil weight",
+    )
+    parser.add_argument(
+        "--huber_weight_start",
+        type=int,
+        default=0,
+        help="peil weight",
+    )
+    parser.add_argument(
         "--noise_for_peil",
         action="store_true",
         help="use rnoise_for_peil。",
@@ -5003,7 +5016,7 @@ def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=5.0):
     
 # NOTE: if you're using the scheduled version, huber_c has to depend on the timesteps already
 def conditional_loss(
-    model_pred: torch.Tensor, target: torch.Tensor, reduction: str = "mean", loss_type: str = "l2", huber_c: float = 0.1
+    model_pred: torch.Tensor, target: torch.Tensor, reduction: str = "mean", loss_type: str = "l2", huber_c: float = 0.1, huber_weight = [1.0,0],is_huber_weight = False
 ):
     #print(f"testforloss:{torch.min(model_pred)},{torch.max(model_pred)},-----target:{torch.min(target)},{torch.max(target)}")
     if loss_type == "l2":
@@ -5012,8 +5025,9 @@ def conditional_loss(
         loss = ssim_loss(model_pred,target)
     elif loss_type == "huber":
         loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
-        loss_ssim = ssim_loss(model_pred,target)
-        loss = loss * 0.8 + loss_ssim *0.2
+        if is_huber_weight:
+            loss_ssim = ssim_loss(model_pred,target)
+            loss = loss * huber_weight[0] + loss_ssim * huber_weight[1]
         """
         diff = model_pred - target
         abs_diff = torch.abs(diff)
