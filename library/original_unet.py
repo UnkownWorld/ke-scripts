@@ -1561,7 +1561,7 @@ class UNet2DConditionModel(nn.Module):
                 self.pool_current_weight = self.adjust_array_proportionally(self.pool_weight[steps],loss)
                 self.pool_weight[steps] = self.pool_current_weight
     def get_pool_weight(self):
-        print(f"pool_weight_test = {self.pool_weight}")
+        #print(f"pool_weight_test = {self.pool_weight}")
         return self.pool_weight
     def set_max_steps(self,max_steps):
         self.max_steps = max_steps
@@ -1673,7 +1673,8 @@ class UNet2DConditionModel(nn.Module):
         sample = self.mid_block(sample, emb, encoder_hidden_states=encoder_hidden_states)
         # Add SPP layer
         #logger.info(f"step_testforit:{self.current_step},pool_current_weight_test, {self.pool_current_weight}")
-        sample = sample * self.pool_current_weight[0] + self.add_spp_layer(sample) * self.pool_current_weight[1] + self.addmaxpool(sample) * self.pool_current_weight[2]
+        #sample = sample * self.pool_current_weight[0] + self.add_spp_layer(sample) * self.pool_current_weight[1] + self.addmaxpool(sample) * self.pool_current_weight[2]
+        sample = sample * 0.3 + self.add_spp_layer(sample) * 0.3 + self.addmaxpool(sample) * 0.2
         # ControlNetの出力を追加する
         if mid_block_additional_residual is not None:
             sample += mid_block_additional_residual
