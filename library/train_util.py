@@ -5005,15 +5005,15 @@ def ssim_loss(img1, img2, window_size=11, sigma=1.5, data_range=5.0):
 def conditional_loss(
     model_pred: torch.Tensor, target: torch.Tensor, reduction: str = "mean", loss_type: str = "l2", huber_c: float = 0.1
 ):
-    print(f"testforloss:{torch.min(model_pred)},{torch.max(model_pred)},-----target:{torch.min(target)},{torch.max(target)}")
+    #print(f"testforloss:{torch.min(model_pred)},{torch.max(model_pred)},-----target:{torch.min(target)},{torch.max(target)}")
     if loss_type == "l2":
         loss = torch.nn.functional.mse_loss(model_pred, target, reduction=reduction)
     elif loss_type == "ssim":
         loss = ssim_loss(model_pred,target)
     elif loss_type == "huber":
-        #loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
-        loss = ssim_loss(model_pred,target)
-
+        loss = 2 * huber_c * (torch.sqrt((model_pred - target) ** 2 + huber_c**2) - huber_c)
+        loss_ssim = ssim_loss(model_pred,target)
+        loss = loss * 0.8 + loss_ssim *0.2
         """
         diff = model_pred - target
         abs_diff = torch.abs(diff)
