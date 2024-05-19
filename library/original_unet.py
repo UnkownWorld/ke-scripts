@@ -1594,6 +1594,7 @@ class UNet2DConditionModel(nn.Module):
         sample: torch.FloatTensor,
         timestep: Union[torch.Tensor, float, int],
         encoder_hidden_states: torch.Tensor,
+        is_sample = True,
         class_labels: Optional[torch.Tensor] = None,
         return_dict: bool = True,
         down_block_additional_residuals: Optional[Tuple[torch.Tensor]] = None,
@@ -1674,7 +1675,8 @@ class UNet2DConditionModel(nn.Module):
         # Add SPP layer
         #logger.info(f"step_testforit:{self.current_step},pool_current_weight_test, {self.pool_current_weight}")
         #sample = sample * self.pool_current_weight[0] + self.add_spp_layer(sample) * self.pool_current_weight[1] + self.addmaxpool(sample) * self.pool_current_weight[2]
-        sample = sample * 0.3 + self.add_spp_layer(sample) * 0.3 + self.addmaxpool(sample) * 0.2
+        if is_sample  == False:
+            sample = sample * 0.3 + self.add_spp_layer(sample) * 0.3 + self.addmaxpool(sample) * 0.2
         # ControlNetの出力を追加する
         if mid_block_additional_residual is not None:
             sample += mid_block_additional_residual
