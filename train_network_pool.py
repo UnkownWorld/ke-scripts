@@ -123,7 +123,7 @@ class NetworkTrainer:
         return encoder_hidden_states
 
     def call_unet(self, args, accelerator, unet, noisy_latents, timesteps, text_conds, batch, weight_dtype):
-        noise_pred = unet(noisy_latents, timesteps, text_conds).sample
+        noise_pred = unet(noisy_latents, timesteps, text_conds,is_sample = False).sample
         return noise_pred
 
     def all_reduce_network(self, accelerator, network):
