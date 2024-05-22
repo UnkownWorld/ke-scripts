@@ -9,7 +9,7 @@ class SelfAttention(nn.Module):
     def __init__(self, in_channels, hidden_channels, num_heads = 1):
         super(SelfAttention, self).__init__()
         self.num_heads = num_heads
-        self.hidden_channels = hidden_channels.to(device)
+        self.hidden_channels = hidden_channels
         self.query_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1).to(device)
         self.key_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1).to(device)
         self.value_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1).to(device)
