@@ -38,7 +38,7 @@ class DynamicWeightedLoss(nn.Module):
         super(DynamicWeightedLoss, self).__init__()
         self.attention = SelfAttention(in_channels, hidden_channels)
         self.fc = nn.Linear(hidden_channels, 1)
-
+        self.ssim = kornia.losses.SSIM(window_size=11)
         # 提前创建 VGG19 模型和 Sobel 边缘检测器
         #self.vgg = models.vgg19(pretrained=True).features[:36].eval()
         self.sobel = kornia.filters.Sobel()
@@ -49,7 +49,7 @@ class DynamicWeightedLoss(nn.Module):
         #target_features = self.vgg(target)
         #perception_loss = F.mse_loss(output_features, target_features)
 
-        ssim_loss = 1 - kornia.losses.ssim(output, target).mean()
+        ssim_loss = 1 - self.ssim(output, target)
 
         output_edges = self.sobel(output)
         target_edges = self.sobel(target)
@@ -58,6 +58,7 @@ class DynamicWeightedLoss(nn.Module):
         loss_values = torch.stack([huber_loss, ssim_loss, edge_loss])
 
         attention_out = self.attention(loss_values.unsqueeze(0).unsqueeze(-1).unsqueeze(-1))
+        print("myutil——1:",attention_out)
         attention_out = attention_out.mean(dim=[2, 3])
         print("myutil:",attention_out)
         weights = torch.softmax(self.fc(attention_out).view(-1), dim=0)
