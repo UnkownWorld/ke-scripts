@@ -72,5 +72,5 @@ def create_loss_weight(hidden_channels=64, in_channels=3):
     return DynamicWeightedLoss(in_channels=in_channels, hidden_channels=hidden_channels)
 
 # 计算动态加权损失
-def compute_dynamic_weights(loss_fn, output, target, huber_c):
-    return loss_fn(output, target, huber_c)
+def compute_dynamic_weights(weight_loss_fn, output, target, huber_c):
+    return weight_loss_fn(output, target, huber_c)
