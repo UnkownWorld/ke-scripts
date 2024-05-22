@@ -799,7 +799,7 @@ class NetworkTrainer:
         peil_ep = 2 * math.pi / (num_update_steps_per_epoch - 1) * args.peil_sin_weight
         unet.set_pool_start_weight(args.pool_start_weight)
         unet.set_max_steps(num_update_steps_per_epoch - 1)
-        weight_loss_fn = myutil.create_loss_weight(hidden_channels=64, in_channels=3)
+        weight_loss_fn = myutil.create_loss_weight(hidden_channels=64, in_channels=4)
         # training loop
         for epoch in range(num_train_epochs):
             is_huber_weight = epoch >= args.huber_weight_start
