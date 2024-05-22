@@ -3,7 +3,33 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
 import kornia
+def ssim_loss(target, pre_loss, window_size=11, sigma=1.5):
+    # 获取数据范围
+    min_val = torch.min(target).item()
+    max_val = torch.max(target).item()
+    data_range = max_val - min_val
 
+    # 图像的均值、方差和协方差
+    channels = target.shape[1]
+    weight = torch.ones(channels, channels, window_size, window_size).to(target.device) / (window_size ** 2)
+    mu1 = F.conv2d(target, weight, padding=window_size // 2)
+    mu2 = F.conv2d(pre_loss, weight, padding=window_size // 2)
+    mu1_sq = mu1 ** 2
+    mu2_sq = mu2 ** 2
+    mu12 = mu1 * mu2
+    sigma1_sq = F.conv2d(target ** 2, weight, padding=window_size // 2) - mu1_sq
+    sigma2_sq = F.conv2d(pre_loss ** 2, weight, padding=window_size // 2) - mu2_sq
+    sigma12 = F.conv2d(target * pre_loss, weight, padding=window_size // 2) - mu12
+
+    # SSIM计算
+    c1 = (0.01 * data_range) ** 2
+    c2 = (0.03 * data_range) ** 2
+    ssim_map = ((2 * mu12 + c1) * (2 * sigma12 + c2)) / ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
+
+    # SSIM损失
+    ssim_loss = 1 - ssim_map
+
+    return ssim_loss
 class SelfAttention(nn.Module):
     """
     自注意力模块，用于计算输入特征图的注意力权重
@@ -38,7 +64,6 @@ class DynamicWeightedLoss(nn.Module):
         super(DynamicWeightedLoss, self).__init__()
         self.attention = SelfAttention(in_channels, hidden_channels)
         self.fc = nn.Linear(hidden_channels, 1)
-        self.ssim = kornia.losses.SSIM(window_size=11)
         # 提前创建 VGG19 模型和 Sobel 边缘检测器
         #self.vgg = models.vgg19(pretrained=True).features[:36].eval()
         self.sobel = kornia.filters.Sobel()
@@ -49,7 +74,7 @@ class DynamicWeightedLoss(nn.Module):
         #target_features = self.vgg(target)
         #perception_loss = F.mse_loss(output_features, target_features)
 
-        ssim_loss = 1 - self.ssim(output, target)
+        ssim_loss = ssim_loss(target,output)
 
         output_edges = self.sobel(output)
         target_edges = self.sobel(target)
