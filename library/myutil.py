@@ -3,33 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
 import kornia
-def ssim_loss(target, pre_loss, window_size=11, sigma=1.5):
-    # 获取数据范围
-    min_val = torch.min(target).item()
-    max_val = torch.max(target).item()
-    data_range = max_val - min_val
 
-    # 图像的均值、方差和协方差
-    channels = target.shape[1]
-    weight = torch.ones(channels, channels, window_size, window_size).to(target.device) / (window_size ** 2)
-    mu1 = F.conv2d(target, weight, padding=window_size // 2)
-    mu2 = F.conv2d(pre_loss, weight, padding=window_size // 2)
-    mu1_sq = mu1 ** 2
-    mu2_sq = mu2 ** 2
-    mu12 = mu1 * mu2
-    sigma1_sq = F.conv2d(target ** 2, weight, padding=window_size // 2) - mu1_sq
-    sigma2_sq = F.conv2d(pre_loss ** 2, weight, padding=window_size // 2) - mu2_sq
-    sigma12 = F.conv2d(target * pre_loss, weight, padding=window_size // 2) - mu12
-
-    # SSIM计算
-    c1 = (0.01 * data_range) ** 2
-    c2 = (0.03 * data_range) ** 2
-    ssim_map = ((2 * mu12 + c1) * (2 * sigma12 + c2)) / ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
-
-    # SSIM损失
-    ssim_loss = 1 - ssim_map
-
-    return ssim_loss
 class SelfAttention(nn.Module):
     """
     自注意力模块，用于计算输入特征图的注意力权重
@@ -40,7 +14,33 @@ class SelfAttention(nn.Module):
         self.key_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
         self.value_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
         self.gamma = nn.Parameter(torch.zeros(1))
+    def ssim_loss(self,target, pre_loss, window_size=11, sigma=1.5):
+        # 获取数据范围
+        min_val = torch.min(target).item()
+        max_val = torch.max(target).item()
+        data_range = max_val - min_val
 
+        # 图像的均值、方差和协方差
+        channels = target.shape[1]
+        weight = torch.ones(channels, channels, window_size, window_size).to(target.device) / (window_size ** 2)
+        mu1 = F.conv2d(target, weight, padding=window_size // 2)
+        mu2 = F.conv2d(pre_loss, weight, padding=window_size // 2)
+        mu1_sq = mu1 ** 2
+        mu2_sq = mu2 ** 2
+        mu12 = mu1 * mu2
+        sigma1_sq = F.conv2d(target ** 2, weight, padding=window_size // 2) - mu1_sq
+        sigma2_sq = F.conv2d(pre_loss ** 2, weight, padding=window_size // 2) - mu2_sq
+        sigma12 = F.conv2d(target * pre_loss, weight, padding=window_size // 2) - mu12
+
+        # SSIM计算
+        c1 = (0.01 * data_range) ** 2
+        c2 = (0.03 * data_range) ** 2
+        ssim_map = ((2 * mu12 + c1) * (2 * sigma12 + c2)) / ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
+
+        # SSIM损失
+        ssim_loss = 1 - ssim_map
+
+        return ssim_loss
     def forward(self, x):
         batch_size, _, height, width = x.size()
         query = self.query_conv(x).view(batch_size, -1, height * width)
