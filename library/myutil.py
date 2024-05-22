@@ -14,6 +14,32 @@ class SelfAttention(nn.Module):
         self.key_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
         self.value_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
         self.gamma = nn.Parameter(torch.zeros(1))
+    def forward(self, x):
+        batch_size, _, height, width = x.size()
+        query = self.query_conv(x).view(batch_size, -1, height * width)
+        key = self.key_conv(x).view(batch_size, -1, height * width).permute(0, 2, 1)
+        value = self.value_conv(x).view(batch_size, -1, height * width)
+
+        energy = torch.einsum('bik,bjk->bij', query, key)
+        attention = torch.softmax(energy, dim=-1)
+
+        attention_out = torch.einsum('bij,bjk->bik', attention, value)
+        attention_out = attention_out.view(batch_size, -1, height, width)
+
+        out = self.gamma * attention_out + x
+        return out
+
+class DynamicWeightedLoss(nn.Module):
+    """
+    动态加权损失函数，使用自注意力机制动态调整损失项的权重
+    """
+    def __init__(self, in_channels, hidden_channels):
+        super(DynamicWeightedLoss, self).__init__()
+        self.attention = SelfAttention(in_channels, hidden_channels)
+        self.fc = nn.Linear(hidden_channels, 1)
+        # 提前创建 VGG19 模型和 Sobel 边缘检测器
+        #self.vgg = models.vgg19(pretrained=True).features[:36].eval()
+        self.sobel = kornia.filters.Sobel()
     def ssim_loss(self,target, pre_loss, window_size=11, sigma=1.5):
         # 获取数据范围
         min_val = torch.min(target).item()
@@ -41,33 +67,6 @@ class SelfAttention(nn.Module):
         ssim_loss = 1 - ssim_map
 
         return ssim_loss
-    def forward(self, x):
-        batch_size, _, height, width = x.size()
-        query = self.query_conv(x).view(batch_size, -1, height * width)
-        key = self.key_conv(x).view(batch_size, -1, height * width).permute(0, 2, 1)
-        value = self.value_conv(x).view(batch_size, -1, height * width)
-
-        energy = torch.einsum('bik,bjk->bij', query, key)
-        attention = torch.softmax(energy, dim=-1)
-
-        attention_out = torch.einsum('bij,bjk->bik', attention, value)
-        attention_out = attention_out.view(batch_size, -1, height, width)
-
-        out = self.gamma * attention_out + x
-        return out
-
-class DynamicWeightedLoss(nn.Module):
-    """
-    动态加权损失函数，使用自注意力机制动态调整损失项的权重
-    """
-    def __init__(self, in_channels, hidden_channels):
-        super(DynamicWeightedLoss, self).__init__()
-        self.attention = SelfAttention(in_channels, hidden_channels)
-        self.fc = nn.Linear(hidden_channels, 1)
-        # 提前创建 VGG19 模型和 Sobel 边缘检测器
-        #self.vgg = models.vgg19(pretrained=True).features[:36].eval()
-        self.sobel = kornia.filters.Sobel()
-
     def forward(self, output, target, huber_c):
         huber_loss = 2 * huber_c * (torch.sqrt((output - target) ** 2 + huber_c**2) - huber_c).mean()
         #output_features = self.vgg(output)
