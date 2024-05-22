@@ -76,9 +76,10 @@ class DynamicWeightedLoss(nn.Module):
         output = output.to(device)
         target = target.to(device)
         huber_loss = 2 * huber_c * (torch.sqrt((output - target) ** 2 + huber_c**2) - huber_c)
+        l2_loss = torch.nn.functional.mse_loss(output, target, reduction='none')
         #ssim_loss = self.ssim_loss(target, output)
-        #loss_values = torch.cat([huber_loss, ssim_loss], dim=1)
-        loss_values = huber_loss
+        loss_values = torch.cat([huber_loss, l2_loss], dim=1)
+        #loss_values = huber_loss
         print(f"myutil——loss_values:{loss_values.shape},max:{torch.max(loss_values)},min:{torch.min(loss_values)}")
         attention_out = self.attention(loss_values)
         print(f"myutil——1:{attention_out.shape},max:{torch.max(attention_out)},min:{torch.min(attention_out)}")
