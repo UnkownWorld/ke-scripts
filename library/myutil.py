@@ -69,18 +69,12 @@ class DynamicWeightedLoss(nn.Module):
         return ssim_loss
     def forward(self, output, target, huber_c):
         huber_loss = 2 * huber_c * (torch.sqrt((output - target) ** 2 + huber_c**2) - huber_c)
-        #output_features = self.vgg(output)
-        #target_features = self.vgg(target)
-        #perception_loss = F.mse_loss(output_features, target_features)
 
         ssim_losss = self.ssim_loss(target,output)
-
-        #output_edges = self.sobel(output)
-        #target_edges = self.sobel(target)
-        #edge_loss = F.mse_loss(output_edges, target_edges)
         print("myutil——huber_loss:",huber_loss.shape)
         print("myutil——ssim_losss:",ssim_losss.shape)
-        loss_values = torch.stack([huber_loss, ssim_losss], dim=1).unsqueeze(1)
+        #loss_values = torch.stack([huber_loss, ssim_losss], dim=1).unsqueeze(1)
+        loss_values = torch.cat([huber_loss.unsqueeze(1), ssim_losss.unsqueeze(1)], dim=1)
         print("myutil——loss_values:",loss_values.shape)
         attention_out = self.attention(loss_values)
         print("myutil——1:",attention_out)
