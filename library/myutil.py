@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class SelfAttention(nn.Module):
     def __init__(self, in_channels, hidden_channels, num_heads = 1):
@@ -82,3 +83,12 @@ class DynamicWeightedLoss(nn.Module):
         weighted_loss = (attention_out * loss_values)
         print("myutil:weighted_loss", weighted_loss.shape)
         return weighted_loss
+        
+def create_loss_weight(hidden_channels=64, in_channels=4):
+    return DynamicWeightedLoss(in_channels=in_channels, hidden_channels=hidden_channels)
+
+# 计算动态加权损失
+def compute_dynamic_weights(weight_loss_fn, output, target, huber_c):
+    return weight_loss_fn(output, target, huber_c)
+
+
