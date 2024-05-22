@@ -84,8 +84,8 @@ class DynamicWeightedLoss(nn.Module):
         print("myutil:weighted_loss", weighted_loss.shape)
         return weighted_loss
         
-def create_loss_weight(hidden_channels=64, in_channels=4):
-    return DynamicWeightedLoss(in_channels=in_channels, hidden_channels=hidden_channels)
+def create_loss_weight(hidden_channels=64, in_channels=4,num_heads = 8):
+    return DynamicWeightedLoss(in_channels=in_channels, hidden_channels=hidden_channels,num_heads = 8)
 
 # 计算动态加权损失
 def compute_dynamic_weights(weight_loss_fn, output, target, huber_c):
