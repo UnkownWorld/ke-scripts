@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 import torch
 from library.device_utils import init_ipex, clean_memory_on_device
-
+import library.myutil as myutil
 init_ipex()
 
 from accelerate.utils import set_seed
@@ -799,6 +799,7 @@ class NetworkTrainer:
         peil_ep = 2 * math.pi / (num_update_steps_per_epoch - 1) * args.peil_sin_weight
         unet.set_pool_start_weight(args.pool_start_weight)
         unet.set_max_steps(num_update_steps_per_epoch - 1)
+        weight_loss_fn = myutil.create_loss_weight(hidden_channels=64, in_channels=3)
         # training loop
         for epoch in range(num_train_epochs):
             is_huber_weight = epoch >= args.huber_weight_start
@@ -897,10 +898,12 @@ class NetworkTrainer:
                         target = noise_scheduler.get_velocity(latents, noise, timesteps)
                     else:
                         target = noise
-
+                    loss = myutil.compute_dynamic_weights(weight_loss_fn, noise_pred.float(), target.float(),huber_c)
+                    """
                     loss = train_util.conditional_loss(
                         noise_pred.float(), target.float(), reduction="none", loss_type=args.loss_type, huber_c=huber_c, huber_weight = args.huber_weight,is_huber_weight = is_huber_weight
                     )
+                    """
                     if args.masked_loss:
                         loss = apply_masked_loss(loss, batch)
                     #loss = torch.sum(loss, dim=(1, 2, 3))
