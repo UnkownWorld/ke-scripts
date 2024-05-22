@@ -68,7 +68,7 @@ class DynamicWeightedLoss(nn.Module):
 
         return ssim_loss
     def forward(self, output, target, huber_c):
-        huber_loss = 2 * huber_c * (torch.sqrt((output - target) ** 2 + huber_c**2) - huber_c).mean()
+        huber_loss = 2 * huber_c * (torch.sqrt((output - target) ** 2 + huber_c**2) - huber_c)
         #output_features = self.vgg(output)
         #target_features = self.vgg(target)
         #perception_loss = F.mse_loss(output_features, target_features)
