@@ -55,7 +55,7 @@ class DynamicWeightedLoss(nn.Module):
         target_edges = self.sobel(target)
         edge_loss = F.mse_loss(output_edges, target_edges)
 
-        loss_values = torch.stack([huber_loss, perception_loss, ssim_loss, edge_loss])
+        loss_values = torch.stack([huber_loss, ssim_loss, edge_loss])
 
         attention_out = self.attention(loss_values.unsqueeze(0).unsqueeze(-1).unsqueeze(-1))
         attention_out = attention_out.mean(dim=[2, 3])
