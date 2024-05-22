@@ -8,7 +8,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class SelfAttention(nn.Module):
     def __init__(self, in_channels, hidden_channels, num_heads = 1):
         super(SelfAttention, self).__init__()
-        self.num_heads = num_heads.to(device)
+        self.num_heads = num_heads
         self.hidden_channels = hidden_channels.to(device)
         self.query_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1).to(device)
         self.key_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1).to(device)
