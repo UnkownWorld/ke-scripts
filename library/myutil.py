@@ -74,7 +74,7 @@ class DynamicWeightedLoss(nn.Module):
         print("myutil——huber_loss:",huber_loss.shape)
         print("myutil——ssim_losss:",ssim_losss.shape)
         #loss_values = torch.stack([huber_loss, ssim_losss], dim=1).unsqueeze(1)
-        loss_values = torch.cat([huber_loss.unsqueeze(1), ssim_losss.unsqueeze(1)], dim=1)
+        loss_values = torch.cat([huber_loss, ssim_losss], dim=0)
         print("myutil——loss_values:",loss_values.shape)
         attention_out = self.attention(loss_values)
         print("myutil——1:",attention_out)
