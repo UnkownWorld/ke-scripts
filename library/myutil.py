@@ -2,16 +2,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# 检查 CUDA 是否可用
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class SelfAttention(nn.Module):
     def __init__(self, in_channels, hidden_channels, num_heads = 1):
         super(SelfAttention, self).__init__()
-        self.num_heads = num_heads
-        self.hidden_channels = hidden_channels
-        self.query_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
-        self.key_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
-        self.value_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
-        self.out_conv = nn.Conv2d(hidden_channels, in_channels, kernel_size=1)
-        self.gamma = nn.Parameter(torch.zeros(1))
+        self.num_heads = num_heads.to(device)
+        self.hidden_channels = hidden_channels.to(device)
+        self.query_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1).to(device)
+        self.key_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1).to(device)
+        self.value_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1).to(device)
+        self.out_conv = nn.Conv2d(hidden_channels, in_channels, kernel_size=1).to(device)
+        self.gamma = nn.Parameter(torch.zeros(1)).to(device)
 
     def forward(self, x):
         print("Input shape:", x.shape)  # 输出输入数据的形状
@@ -38,8 +41,8 @@ class SelfAttention(nn.Module):
 class DynamicWeightedLoss(nn.Module):
     def __init__(self, in_channels, hidden_channels,num_heads = 8):
         super(DynamicWeightedLoss, self).__init__()
-        self.attention = SelfAttention(in_channels, hidden_channels,num_heads)
-        self.fc = nn.Linear(hidden_channels, 1)
+        self.attention = SelfAttention(in_channels, hidden_channels,num_heads).to(device)
+        self.fc = nn.Linear(hidden_channels, 1).to(device)
 
     def ssim_loss(self,target, pre_loss, window_size=11, sigma=1.5):
         # 获取数据范围
@@ -69,6 +72,9 @@ class DynamicWeightedLoss(nn.Module):
 
         return ssim_loss
     def forward(self, output, target, huber_c):
+        # 确保输入张量也在 GPU 上
+        output = output.to(device)
+        target = target.to(device)
         huber_loss = 2 * huber_c * (torch.sqrt((output - target) ** 2 + huber_c**2) - huber_c)
         ssim_loss = self.ssim_loss(target, output)
 
@@ -85,7 +91,7 @@ class DynamicWeightedLoss(nn.Module):
         return weighted_loss
         
 def create_loss_weight(hidden_channels=64, in_channels=4,num_heads = 8):
-    return DynamicWeightedLoss(in_channels=in_channels, hidden_channels=hidden_channels,num_heads = 8)
+    return DynamicWeightedLoss(in_channels=in_channels, hidden_channels=hidden_channels,num_heads = 8).to(device)
 
 # 计算动态加权损失
 def compute_dynamic_weights(weight_loss_fn, output, target, huber_c):
