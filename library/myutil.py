@@ -68,7 +68,7 @@ class DynamicWeightedLoss(nn.Module):
         return weighted_loss
 
 # 提前创建 DynamicWeightedLoss 实例
-def create_loss_weight(hidden_channels=64, in_channels=3):
+def create_loss_weight(hidden_channels=64, in_channels=4):
     return DynamicWeightedLoss(in_channels=in_channels, hidden_channels=hidden_channels)
 
 # 计算动态加权损失
