@@ -32,9 +32,9 @@ class SelfAttention(nn.Module):
         return out
 
 class DynamicWeightedLoss(nn.Module):
-    def __init__(self, in_channels, hidden_channels):
+    def __init__(self, in_channels, hidden_channels,num_heads = 8):
         super(DynamicWeightedLoss, self).__init__()
-        self.attention = SelfAttention(in_channels, hidden_channels)
+        self.attention = SelfAttention(in_channels, hidden_channels,num_heads)
         self.fc = nn.Linear(hidden_channels, 1)
 
     def ssim_loss(self,target, pre_loss, window_size=11, sigma=1.5):
