@@ -1,45 +1,42 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision.models as models
-import kornia
-
 class SelfAttention(nn.Module):
-    """
-    自注意力模块，用于计算输入特征图的注意力权重
-    """
-    def __init__(self, in_channels, hidden_channels):
+    def __init__(self, in_channels, hidden_channels, num_heads = 1):
         super(SelfAttention, self).__init__()
+        self.num_heads = num_heads
+        self.hidden_channels = hidden_channels
         self.query_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
         self.key_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
         self.value_conv = nn.Conv2d(in_channels, hidden_channels, kernel_size=1)
+        self.out_conv = nn.Conv2d(hidden_channels, in_channels, kernel_size=1)
         self.gamma = nn.Parameter(torch.zeros(1))
+
     def forward(self, x):
-        batch_size, _, height, width = x.size()
-        query = self.query_conv(x).view(batch_size, -1, height * width)
-        key = self.key_conv(x).view(batch_size, -1, height * width).permute(0, 2, 1)
-        value = self.value_conv(x).view(batch_size, -1, height * width)
-
-        energy = torch.einsum('bik,bjk->bij', query, key)
+        print("Input shape:", x.shape)  # 输出输入数据的形状
+        batch_size, channels, height, width = x.size()
+        query = self.query_conv(x).view(batch_size, self.hidden_channels // self.num_heads, self.num_heads, height * width).permute(0, 2, 1, 3).contiguous().view(batch_size * self.num_heads, self.hidden_channels // self.num_heads, height * width)
+        key = self.key_conv(x).view(batch_size, self.hidden_channels // self.num_heads, self.num_heads, height * width).permute(0, 2, 1, 3).contiguous().view(batch_size * self.num_heads, self.hidden_channels // self.num_heads, height * width)
+        value = self.value_conv(x).view(batch_size, self.hidden_channels // self.num_heads, self.num_heads, height * width).permute(0, 2, 1, 3).contiguous().view(batch_size * self.num_heads, self.hidden_channels // self.num_heads, height * width)
+        
+        print("Query conv weight shape:", self.query_conv.weight.shape)  # 输出查询卷积层的权重形状
+        print("Key conv weight shape:", self.key_conv.weight.shape)  # 输出键卷积层的权重形状
+        print("Value conv weight shape:", self.value_conv.weight.shape)  # 输出值卷积层的权重形状
+        energy = torch.bmm(query, key.transpose(1, 2))
         attention = torch.softmax(energy, dim=-1)
-
-        attention_out = torch.einsum('bij,bjk->bik', attention, value)
-        attention_out = attention_out.view(batch_size, -1, height, width)
-
+    
+        attention_out = torch.bmm(attention, value)
+        print("attention_out:", attention_out.shape)
+        attention_out = attention_out.view(batch_size, self.num_heads, self.hidden_channels // self.num_heads, height * width).permute(0, 2, 1, 3).contiguous().view(batch_size, self.hidden_channels, height, width)
+        print("attention_out:", attention_out.shape)
+        attention_out = self.out_conv(attention_out)
+        print("attention_out:", attention_out.shape)
         out = self.gamma * attention_out + x
         return out
 
 class DynamicWeightedLoss(nn.Module):
-    """
-    动态加权损失函数，使用自注意力机制动态调整损失项的权重
-    """
     def __init__(self, in_channels, hidden_channels):
         super(DynamicWeightedLoss, self).__init__()
         self.attention = SelfAttention(in_channels, hidden_channels)
         self.fc = nn.Linear(hidden_channels, 1)
-        # 提前创建 VGG19 模型和 Sobel 边缘检测器
-        #self.vgg = models.vgg19(pretrained=True).features[:36].eval()
-        #self.sobel = kornia.filters.Sobel()
+
     def ssim_loss(self,target, pre_loss, window_size=11, sigma=1.5):
         # 获取数据范围
         min_val = torch.min(target).item()
@@ -69,27 +66,16 @@ class DynamicWeightedLoss(nn.Module):
         return ssim_loss
     def forward(self, output, target, huber_c):
         huber_loss = 2 * huber_c * (torch.sqrt((output - target) ** 2 + huber_c**2) - huber_c)
+        ssim_loss = self.ssim_loss(target, output)
 
-        ssim_losss = self.ssim_loss(target,output)
-        print("myutil——huber_loss:",huber_loss.shape)
-        print("myutil——ssim_losss:",ssim_losss.shape)
-        #loss_values = torch.stack([huber_loss, ssim_losss], dim=1).unsqueeze(1)
-        loss_values = torch.cat([huber_loss, ssim_losss], dim=0)
-        print("myutil——loss_values:",loss_values.shape)
+        loss_values = torch.cat([huber_loss, ssim_loss], dim=1)
+        print("myutil——loss_values:", loss_values.shape)
         attention_out = self.attention(loss_values)
-        print("myutil——1:",attention_out)
-        attention_out = attention_out.mean(dim=[2, 3])
-        print("myutil:",attention_out)
-        weights = torch.softmax(self.fc(attention_out).view(-1), dim=0)
-        print("myutil:weights",weights.shape)
-        weighted_loss = (weights * loss_values)
-        print("myutil:weighted_loss",weighted_loss.shape)
+        print("myutil——1:", attention_out.shape)
+        #attention_out = attention_out.mean(dim=[2, 3])
+        #print("myutil:", attention_out.shape)
+        #weights = torch.softmax(self.fc(attention_out).view(-1), dim=0)
+        #print("myutil:weights", weights.shape)
+        weighted_loss = (attention_out * loss_values)
+        print("myutil:weighted_loss", weighted_loss.shape)
         return weighted_loss
-
-# 提前创建 DynamicWeightedLoss 实例
-def create_loss_weight(hidden_channels=64, in_channels=4):
-    return DynamicWeightedLoss(in_channels=in_channels, hidden_channels=hidden_channels)
-
-# 计算动态加权损失
-def compute_dynamic_weights(weight_loss_fn, output, target, huber_c):
-    return weight_loss_fn(output, target, huber_c)
