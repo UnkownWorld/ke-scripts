@@ -40,15 +40,14 @@ class DynamicWeightedLoss(nn.Module):
         self.fc = nn.Linear(hidden_channels, 1)
 
         # 提前创建 VGG19 模型和 Sobel 边缘检测器
-        self.vgg = models.vgg19(pretrained=True).features[:36].eval()
+        #self.vgg = models.vgg19(pretrained=True).features[:36].eval()
         self.sobel = kornia.filters.Sobel()
 
     def forward(self, output, target, huber_c):
         huber_loss = 2 * huber_c * (torch.sqrt((output - target) ** 2 + huber_c**2) - huber_c).mean()
-        
-        output_features = self.vgg(output)
-        target_features = self.vgg(target)
-        perception_loss = F.mse_loss(output_features, target_features)
+        #output_features = self.vgg(output)
+        #target_features = self.vgg(target)
+        #perception_loss = F.mse_loss(output_features, target_features)
 
         ssim_loss = 1 - kornia.losses.ssim(output, target).mean()
 
