@@ -87,9 +87,9 @@ class DynamicWeightedLoss(nn.Module):
         attention_out = attention_out.mean(dim=[2, 3])
         print("myutil:",attention_out)
         weights = torch.softmax(self.fc(attention_out).view(-1), dim=0)
-        
+        print("myutil:weights",weights.shape)
         weighted_loss = (weights * loss_values)
-
+        print("myutil:weighted_loss",weighted_loss.shape)
         return weighted_loss
 
 # 提前创建 DynamicWeightedLoss 实例
