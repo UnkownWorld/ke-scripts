@@ -1,3 +1,6 @@
+import torch
+import torch.nn as nn
+
 class SelfAttention(nn.Module):
     def __init__(self, in_channels, hidden_channels, num_heads = 1):
         super(SelfAttention, self).__init__()
